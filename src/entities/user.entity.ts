@@ -3,7 +3,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { RoleEntity } from "./role.entity";
 
 @Entity('users')
-export class UsersEntity extends BaseEntity {
+export class UserEntity extends BaseEntity {
     @Column({unique: true, nullable: false})
     email!: string;
 
