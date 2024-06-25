@@ -12,7 +12,8 @@ export abstract class BaseEntity {
 
     @UpdateDateColumn({
         type: 'timestamp',
-        name: 'updated_at'
+        name: 'updated_at',
+        nullable: true
     })
-    updatedAt!: Date
+    updatedAt: Date
 }

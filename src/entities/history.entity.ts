@@ -1,4 +1,4 @@
-import { BaseEntity } from "src/config/base.entity";
+import { BaseEntity } from "../config/base.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { ParkingRecordEntity } from "./parking.record.entity";
 
