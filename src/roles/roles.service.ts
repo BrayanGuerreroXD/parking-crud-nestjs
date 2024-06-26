@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
 import { Repository } from 'typeorm';
-import { ErrorManager } from 'src/utils/error.manager';
+import { EntityNotFoundException } from 'src/exception-handler/exceptions.classes';
 
 @Injectable()
 export class RolesService {
@@ -18,11 +18,11 @@ export class RolesService {
                 .getOne();
 
             if (!role) 
-              throw new ErrorManager({ type: "NOT_FOUND", message: 'Role not found' });
+              throw new EntityNotFoundException('Role not found');
 
             return role;
         } catch (e) {
-          throw ErrorManager.createSignatureError(e.message);  
+            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);   
         }
     }
 }

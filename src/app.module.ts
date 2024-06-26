@@ -26,6 +26,6 @@ import { UsersModule } from './users/users.module';
     HistoriesModule,
     ParkingsModule,
     ParkingRecordsModule,
-  ]
+  ],
 })
 export class AppModule {}

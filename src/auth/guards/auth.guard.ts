@@ -5,6 +5,7 @@ import { UsersService } from '../../users/users.service';
 import { IUseToken } from '../interfaces/auth.interface';
 import { useToken } from '../../utils/user.token';
 import { Request } from 'express';
+import { InvalidTokenException, JwtAuthException } from 'src/exception-handler/exceptions.classes';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -31,7 +32,7 @@ export class AuthGuard implements CanActivate {
         const bearerToken = req.headers['authorization']
 
         if (!bearerToken || Array.isArray(bearerToken)) {
-            throw new UnauthorizedException('Invalid token');
+            throw new InvalidTokenException();
         }
 
         const token = bearerToken.split('Bearer ')[1];
@@ -39,7 +40,7 @@ export class AuthGuard implements CanActivate {
         const manageToken: IUseToken | string = useToken(token);
 
         if (typeof manageToken === 'string') {
-          throw new UnauthorizedException(manageToken);
+          throw new JwtAuthException(manageToken);
         }
 
         if (manageToken.isExpired) {
@@ -47,12 +48,9 @@ export class AuthGuard implements CanActivate {
         }
 
         const { sub } = manageToken;
+        
         const user = await this.userService.findUserById(+sub);
-        if(!user){
-          throw new UnauthorizedException('Invalid user');
-        }
 
-        console.log(user)
         req.idUser = user.id.toString();
         req.roleUser = user.role.name;
         

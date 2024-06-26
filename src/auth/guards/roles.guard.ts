@@ -1,8 +1,7 @@
 import {
   CanActivate,
   ExecutionContext,
-  Injectable,
-  UnauthorizedException,
+  Injectable
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
@@ -11,6 +10,7 @@ import { PUBLIC_KEY, ROLES_KEY } from 'src/constants/key-decorators';
 import { ROLES } from 'src/constants/roles';
 import { useToken } from 'src/utils/user.token';
 import { IUseToken } from '../interfaces/auth.interface';
+import { InvalidTokenException, JwtAuthException } from 'src/exception-handler/exceptions.classes';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -39,7 +39,7 @@ export class RolesGuard implements CanActivate {
     const bearerToken = req.headers['authorization']
 
     if (!bearerToken || Array.isArray(bearerToken)) {
-        throw new UnauthorizedException('Invalid token');
+        throw new InvalidTokenException();
     }
 
     const token = bearerToken.split('Bearer ')[1];
@@ -47,13 +47,13 @@ export class RolesGuard implements CanActivate {
     const manageToken: IUseToken | string = useToken(token);
 
     if (typeof manageToken === 'string') {
-      throw new UnauthorizedException(manageToken);
+      throw new JwtAuthException(manageToken);
     }
 
     const isAuth = roles.some((role) => role === manageToken.role);
 
     if (!isAuth)
-      throw new UnauthorizedException('No tienes permisos para esta operacion');
+      throw new JwtAuthException('User does not have permission to access this route');
 
     return true;
   }

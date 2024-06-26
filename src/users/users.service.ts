@@ -1,14 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from './entities/user.entity';
 import { UserRequestDto } from './dto/user.request.dto';
-import { ErrorManager } from '../utils/error.manager';
 import * as bcrypt from 'bcrypt';
 import { ROLES } from 'src/constants/roles';
 import { RolesService } from 'src/roles/roles.service';
 import { UserResponseDto } from './dto/user.response.dto';
 import { plainToInstance } from 'class-transformer';
+import { EmailAlreadyExistsException, EntityNotFoundException } from 'src/exception-handler/exceptions.classes';
 
 @Injectable()
 export class UsersService {
@@ -23,7 +23,7 @@ export class UsersService {
             const emailAlreadyExists = await this.existEmail(body.email);
             
             if (emailAlreadyExists)
-              throw new ErrorManager({ type: "CONFLICT", message: 'Email already exists' });
+              throw new EmailAlreadyExistsException();
             
             const role = await this.rolesService.findByName(ROLES.SOCIO);
 
@@ -49,7 +49,7 @@ export class UsersService {
 
             return userResponseDto;
         } catch (e) {
-            throw ErrorManager.createSignatureError(e.message);          
+            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);         
         }
     }
     
@@ -61,10 +61,10 @@ export class UsersService {
                 .where({ id })
                 .getOne();
             if (!user) 
-                throw new ErrorManager({ type: "NOT_FOUND", message: 'User not found' });
+                throw new EntityNotFoundException('User not found');
             return user;
         } catch (e) {
-            throw ErrorManager.createSignatureError(e.message);          
+            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);            
         }
     }   
 
@@ -75,9 +75,11 @@ export class UsersService {
                 .addSelect('user.password')
                 .where({ [key]: value })
                 .getOne();
+            if (!user) 
+                throw new EntityNotFoundException('User not found');
             return user;
-        } catch (error) {
-            throw ErrorManager.createSignatureError(error.message);
+        } catch (e) {
+            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);   
         }
     }
 

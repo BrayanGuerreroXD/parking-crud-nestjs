@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ParkingEntity } from './entities/parking.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,7 +6,6 @@ import { ParkingRequestDto } from './dto/parking.request.dto';
 import { ParkingResponseDto } from './dto/parking.response.dto';
 import { UsersService } from 'src/users/users.service';
 import { plainToInstance } from 'class-transformer';
-import { ErrorManager } from 'src/utils/error.manager';
 import { ROLES } from 'src/constants/roles';
 
 @Injectable()
@@ -23,10 +22,7 @@ export class ParkingsService {
       const user = await this.usersService.findUserById(body.userId);
 
       if (user?.role?.name !== ROLES.SOCIO) {
-        throw new ErrorManager({ 
-          type: "BAD_REQUEST", 
-          message: "User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking" 
-        });
+        throw new BadRequestException("User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking");
       }
 
       parkingEntity.name = body.name;
@@ -43,7 +39,7 @@ export class ParkingsService {
 
       return response;
     } catch (e) {
-      throw ErrorManager.createSignatureError(e.message);
+      throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR); 
     }
   }
 
