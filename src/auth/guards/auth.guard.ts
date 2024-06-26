@@ -28,12 +28,13 @@ export class AuthGuard implements CanActivate {
       
         const req = context.switchToHttp().getRequest<Request>();
 
-        const token = req.headers['authorization'].split('Bearer ')[1];
-        console.log(token)
+        const bearerToken = req.headers['authorization']
 
-        if (!token || Array.isArray(token)) {
+        if (!bearerToken || Array.isArray(bearerToken)) {
             throw new UnauthorizedException('Invalid token');
         }
+
+        const token = bearerToken.split('Bearer ')[1];
 
         const manageToken: IUseToken | string = useToken(token);
 
