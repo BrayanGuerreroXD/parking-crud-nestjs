@@ -1,6 +1,6 @@
-import { BaseEntity } from "../config/base.entity";
+import { BaseEntity } from "../../config/base.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { UserEntity } from "./user.entity";
+import { UserEntity } from "../../users/entities/user.entity";
 
 @Entity("parking")
 export class ParkingEntity extends BaseEntity {

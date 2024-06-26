@@ -1,7 +1,7 @@
-import { BaseEntity } from "../config/base.entity";
+import { BaseEntity } from "../../config/base.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { ParkingEntity } from "./parking.entity";
-import { VehicleEntity } from "./vehicle.entity";
+import { ParkingEntity } from "../../parkings/entities/parking.entity";
+import { VehicleEntity } from "../../vehicles/entities/vehicle.entity";
 
 @Entity("parkingrecord")
 export class ParkingRecordEntity extends BaseEntity {

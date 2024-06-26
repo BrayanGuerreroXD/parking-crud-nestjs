@@ -1,12 +1,14 @@
-import { BaseEntity } from "../config/base.entity";
+import { BaseEntity } from "../../config/base.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
-import { RoleEntity } from "./role.entity";
+import { RoleEntity } from "../../roles/entities/role.entity";
+import { Exclude } from "class-transformer";
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
     @Column({unique: true, nullable: false})
     email!: string;
 
+    @Exclude()
     @Column()
     password!: string;
 

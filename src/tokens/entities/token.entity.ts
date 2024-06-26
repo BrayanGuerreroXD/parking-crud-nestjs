@@ -1,5 +1,5 @@
-import { BaseEntity } from "../config/base.entity";
-import { UserEntity } from "./user.entity";
+import { BaseEntity } from "../../config/base.entity";
+import { UserEntity } from "../../users/entities/user.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity('tokens')

@@ -1,0 +1,1 @@
+import { CORS } from './cors';
