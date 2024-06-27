@@ -1,14 +1,15 @@
 import { 
     BadRequestException, 
     ConflictException, 
+    HttpException, 
     InternalServerErrorException, 
     NotFoundException, 
     UnauthorizedException 
 } from "@nestjs/common";
 
-class EmailAlreadyExistsException extends ConflictException {
+class EmailAlreadyExistsException extends HttpException {
     constructor() {
-        super('Email already exists');
+        super('Email already exists', 409);
     }
 }
 
