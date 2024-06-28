@@ -9,15 +9,30 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const status = exception.getStatus();
 
-        const message = exception instanceof HttpException
-            ? (typeof exception.getResponse() === 'string' ? exception.getResponse() : exception.getResponse()['message'])
-            : 'Unexpected error';
+        const res = exception.getResponse();
+        const defaultMessage = 'Unexpected error';
+        let message: string[];
 
-        const errorResponse = new ExceptionResponseDto(message);
+        if (typeof res === 'string') {
+            message = [res];
+        } else if (typeof res === 'object' && res !== null) {
+            if (typeof res['message'] === 'string') {
+                message = [res['message']];
+            } else if (Array.isArray(res['message'])) {
+                message = res['message'];
+            } else {
+                message = [defaultMessage];
+            }
+        } else {
+            message = [defaultMessage];
+        }
 
-        response.status(status).json({
-            ...errorResponse,
-            timestamp: new Date().toISOString(),
-        });
+        const errorResponse = new ExceptionResponseDto(
+            message,
+            exception.name,
+            exception.getStatus()
+        );
+
+        response.status(status).json(errorResponse);
     }
 }

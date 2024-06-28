@@ -49,56 +49,31 @@ export class UsersService {
 
             return userResponseDto;
         } catch (e) {
-            await queryRunner.rollbackTransaction();
-            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+            if (queryRunner.isTransactionActive) {
+                await queryRunner.rollbackTransaction();
+            }
+            throw e;
         } finally {
             await queryRunner.release();
         }
     }
     
     public async findUserById(id: number): Promise<UserEntity> {
-        try {
-            const user: UserEntity =  await this.userRepository.findUserById(id)
-            if (!user) 
-                throw new EntityNotFoundException('User not found');
-            return user;
-        } catch (e) {
-            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);            
-        }
+        const user: UserEntity =  await this.userRepository.findUserById(id)
+        if (!user) 
+            throw new EntityNotFoundException('User not found');
+        return user;
     }   
 
     public async findBy({ key, value } : { key: keyof UserRequestDto; value: any }) {
-        try {
-            const user: UserEntity = await this.userRepository.findByKey(key, value);
-            if (!user) 
-                throw new EntityNotFoundException('User not found');
-            return user;
-        } catch (e) {
-            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);   
-        }
+        const user: UserEntity = await this.userRepository.findByKey(key, value);
+        if (!user) 
+            throw new EntityNotFoundException('User not found');
+        return user;
     }
 
     private async existEmail(email: string): Promise<boolean> {
-      const count = await this.userRepository.count({ where: { email } });
-      return count > 0;
-    }
-
-    // =================================== AUXILIARY FUNCTIONS ===================================
-
-    private async saveUser(user: UserEntity) : Promise<UserEntity> {
-        const queryRunner = this.userRepository.manager.connection.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const savedUser = await queryRunner.manager.save(user);
-            await queryRunner.commitTransaction();
-            return savedUser;
-        } catch (e) {
-            console.log("Catch del query runner")
-            await queryRunner.rollbackTransaction();
-            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
-        } finally {
-            await queryRunner.release();
-        }
+        const count = await this.userRepository.count({ where: { email } });
+        return count > 0;
     }
 }

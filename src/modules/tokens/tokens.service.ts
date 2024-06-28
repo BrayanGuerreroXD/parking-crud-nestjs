@@ -1,18 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CreateTokenDto } from './dto/create-token.dto';
 import { TokenEntity } from './entities/token.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { useToken } from 'src/utils/user.token';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
-import { JwtAuthException } from 'src/exception-handler/exceptions.classes';
+import { InvalidTokenException, JwtAuthException } from 'src/exception-handler/exceptions.classes';
 import { IUseToken } from '../auth/interfaces/auth.interface';
+
+import { Request } from 'express';
+
 
 @Injectable()
 export class TokensService {
 
     constructor(
-      @InjectRepository(TokenEntity) private readonly tokenRepository : Repository<TokenEntity>
+        @InjectRepository(TokenEntity) private readonly tokenRepository : Repository<TokenEntity>,
+        @Inject('REQUEST') private readonly request: Request,
     ) {}
 
     public async createToken(createTokenDto: CreateTokenDto) {
@@ -53,14 +57,56 @@ export class TokensService {
         await this.removeTokenByValueAndUserId(toke, userId);
     }
 
+    // Get the role of the user by the string token
     public async getRolesByToken(token: string): Promise<string> {
         const manageToken: IUseToken = useToken(token);
         return manageToken.role;
     }
 
+    // Get the role of the user by the request token
+    public async getRoleByRequestToken() : Promise<string> {
+        const headers = this.request.headers;
+        const bearerToken = headers['authorization']
+
+        if (!bearerToken || Array.isArray(bearerToken))
+            throw new InvalidTokenException();
+
+        const token = bearerToken.split('Bearer ')[1];
+        const manageToken: IUseToken = useToken(token);
+        return manageToken.role;
+    }
+
+    // Get the user id by the string token
     public async getUserIdByToken(token: string): Promise<number> {
         const manageToken: IUseToken = useToken(token);
         return +manageToken.sub;
+    }
+
+    // Get the user id by the request token
+    public async getUserIdByRequestToken() : Promise<number> {
+        const headers = this.request.headers;
+        const bearerToken = headers['authorization']
+
+        if (!bearerToken || Array.isArray(bearerToken))
+            throw new InvalidTokenException();
+
+        const token = bearerToken.split('Bearer ')[1];
+        const manageToken: IUseToken = useToken(token);
+        return +manageToken.sub;
+    }
+
+    public async existsToken(token: string): Promise<boolean> {
+        const manageToken: IUseToken = useToken(token);
+        const userId = +manageToken.sub;
+    
+        const tokenExists = await this.tokenRepository
+            .createQueryBuilder('token')
+            .leftJoin('token.user', 'user')
+            .where('token.value = :token', { token })
+            .andWhere('user.id = :userId', { userId })
+            .getCount() > 0;
+    
+        return tokenExists;
     }
 
     private async removeTokenByValueAndUserId(value: string, userId: number) {

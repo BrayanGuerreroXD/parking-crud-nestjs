@@ -1,26 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { CreateVehicleDto } from './dto/create-vehicle.dto';
-import { UpdateVehicleDto } from './dto/update-vehicle.dto';
+import { DataSource } from 'typeorm';
+import { VehicleEntity } from './entities/vehicle.entity';
+import { VehiclesRepository } from './vehicles.repository';
 
 @Injectable()
 export class VehiclesService {
-  create(createVehicleDto: CreateVehicleDto) {
-    return 'This action adds a new vehicle';
+
+  constructor(
+    private readonly vehiclesRepository: VehiclesRepository,
+    private readonly dataSource: DataSource
+  ) {}
+
+  public async createVehicle(plate: string) : Promise<VehicleEntity> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const vehicleEntity: VehicleEntity = new VehicleEntity();
+      vehicleEntity.plate = plate;
+      const savedVehicle = await queryRunner.manager.save(vehicleEntity);
+      await queryRunner.commitTransaction();
+      return savedVehicle;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  findAll() {
-    return `This action returns all vehicles`;
+  public async existsVehicleByPlate(plate: string) : Promise<boolean> {
+    return await this.vehiclesRepository.existsByPlate(plate);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} vehicle`;
-  }
-
-  update(id: number, updateVehicleDto: UpdateVehicleDto) {
-    return `This action updates a #${id} vehicle`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} vehicle`;
+  public async getVehicleByPlate(plate: string) : Promise<VehicleEntity> {
+    return await this.vehiclesRepository.findByPlate(plate);
   }
 }

@@ -6,12 +6,14 @@ import { Request } from 'express';
 import { InvalidTokenException, JwtAuthException } from 'src/exception-handler/exceptions.classes';
 import { UsersService } from 'src/modules/users/users.service';
 import { useToken } from 'src/utils/user.token';
+import { AuthService } from '../services/auth.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
 
     constructor(
       private readonly userService : UsersService,
+      private readonly authService : AuthService,
       private readonly reflector : Reflector
     ) {}
 
@@ -41,6 +43,10 @@ export class AuthGuard implements CanActivate {
 
         if (manageToken.isExpired) {
           throw new JwtAuthException('Token expired');
+        }
+
+        if (!this.authService.validateExistsToken(token)) {
+          throw new InvalidTokenException();
         }
 
         const { sub } = manageToken;

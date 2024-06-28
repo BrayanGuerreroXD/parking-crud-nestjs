@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Put, HttpCode, Req } from '@nestjs/common';
 import { ParkingsService } from './parkings.service';
 import { ParkingRequestDto } from './dto/parking.request.dto';
 import { ParkingResponseDto } from './dto/parking.response.dto';
@@ -13,30 +13,35 @@ export class ParkingsController {
 
   @Post('parking')
   @Roles('ADMIN')
+  @HttpCode(200)
   async createParking(@Body() body: ParkingRequestDto) : Promise<ParkingResponseDto> {
     return this.parkingsService.createParking(body);
   }
   
   @Put('parking/:id')
   @Roles('ADMIN')
+  @HttpCode(200)
   async updateParking(@Param('id') id : number, @Body() body: ParkingRequestDto) : Promise<ParkingResponseDto> {
     return this.parkingsService.updateParking(id, body);
   }
 
-  @Get('parking')
+  @Get('parking/:id')
   @Roles('ADMIN', 'SOCIO')
+  @HttpCode(200)
   async getParkingById(@Param('id') id : number) : Promise<ParkingResponseDto> {
     return this.parkingsService.getParkingById(id);
   }
   
   @Get('parkings')
   @Roles('ADMIN', 'SOCIO')
+  @HttpCode(200)
   async getAllParkings() : Promise<ParkingResponseDto[]> {
     return this.parkingsService.getAllParkings();
   }
 
   @Delete('parking/:id')
   @Roles('ADMIN')
+  @HttpCode(200)
   async deleteParking(@Param('id') id : number) : Promise<void> {
     return this.parkingsService.deleteParking(id);
   }

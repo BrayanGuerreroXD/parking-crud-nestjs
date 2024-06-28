@@ -34,6 +34,10 @@ export class AuthService {
         return null;
     }
 
+    public async validateExistsToken(token: string): Promise<boolean> {
+        return this.tokenService.existsToken(token);
+    }
+
     public async generateJWT(user: UserEntity): Promise<AuthResponse> {
         const EXPIRATION_TIME = process.env.EXPIRATION_TIME;
         
