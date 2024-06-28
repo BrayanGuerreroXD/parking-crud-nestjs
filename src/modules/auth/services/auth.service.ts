@@ -35,7 +35,7 @@ export class AuthService {
     }
 
     public async validateExistsToken(token: string): Promise<boolean> {
-        return this.tokenService.existsToken(token);
+        return await this.tokenService.existsToken(token);
     }
 
     public async generateJWT(user: UserEntity): Promise<AuthResponse> {

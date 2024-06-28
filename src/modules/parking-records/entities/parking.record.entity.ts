@@ -8,7 +8,7 @@ export class ParkingRecordEntity extends BaseEntity {
     @Column()
     entryDate!: Date;
 
-    @Column()
+    @Column({nullable: true})
     exitDate!: Date;
 
     @ManyToOne(() => VehicleEntity, {nullable: false})

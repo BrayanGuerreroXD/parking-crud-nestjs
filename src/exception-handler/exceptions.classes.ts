@@ -60,6 +60,18 @@ class TokenNullException extends BadRequestException {
     }
 }
 
+class ParkingIsFullException extends BadRequestException {
+    constructor() {
+        super('Parking is full');
+    }
+}
+
+class VehicleNotFoundException extends NotFoundException {
+    constructor() {
+        super('Vehicle not found');
+    }
+}
+
 export {
     EmailAlreadyExistsException,
     EmailNotFoundException,
@@ -69,5 +81,7 @@ export {
     NotSendMailException,
     ParkingNotAssignedException,
     ParkingNotExistsException,
-    TokenNullException
+    TokenNullException,
+    ParkingIsFullException,
+    VehicleNotFoundException,
 }

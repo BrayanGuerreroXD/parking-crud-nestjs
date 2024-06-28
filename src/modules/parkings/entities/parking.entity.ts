@@ -7,7 +7,7 @@ export class ParkingEntity extends BaseEntity {
     @Column()
     name!: string;
 
-    @Column()
+    @Column('double precision')
     hourlyCost!: number;
 
     @Column()

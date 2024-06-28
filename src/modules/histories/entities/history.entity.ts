@@ -4,7 +4,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity("history")
 export class HistoryEntity extends BaseEntity {
-    @Column()
+    @Column('double precision')
     totalCost!: number;
 
     @ManyToOne(() => ParkingRecordEntity, {nullable: false})

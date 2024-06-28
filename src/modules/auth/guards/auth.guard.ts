@@ -45,7 +45,8 @@ export class AuthGuard implements CanActivate {
           throw new JwtAuthException('Token expired');
         }
 
-        if (!this.authService.validateExistsToken(token)) {
+        const tokenExists = await this.authService.validateExistsToken(token);
+        if (!tokenExists) {
           throw new InvalidTokenException();
         }
 

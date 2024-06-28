@@ -15,5 +15,6 @@ import { TokensModule } from '../tokens/tokens.module';
   ],
   controllers: [ParkingsController],
   providers: [ParkingsService, ParkingRepository],
+  exports: [ParkingsService]
 })
 export class ParkingsModule {}

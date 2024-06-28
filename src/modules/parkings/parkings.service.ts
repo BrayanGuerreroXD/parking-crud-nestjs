@@ -121,6 +121,18 @@ export class ParkingsService {
       });
   }
 
+  public async getParkingEntityById(id: number) : Promise<ParkingEntity> {
+    if (id == null || id <= 0)
+      throw new BadRequestException("The parking id cannot be null or less than or equal to 0");
+
+    const parkingEntity: ParkingEntity = await this.parkingRepository.findParkingById(id);
+
+    if (!parkingEntity) 
+      throw new ParkingNotExistsException();
+
+    return parkingEntity;
+  }
+
   public async getAllParkings() : Promise<ParkingResponseDto[]> {
       const userId: number = await this.tokensService.getUserIdByRequestToken();
       const userRole: string = await this.tokensService.getRoleByRequestToken();
