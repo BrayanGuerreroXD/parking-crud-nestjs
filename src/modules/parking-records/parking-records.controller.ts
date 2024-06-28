@@ -43,22 +43,22 @@ export class ParkingRecordsController {
   async getMostRegisteredVehiclesAtAllParking() : Promise<VehicleResponseDto[]> {
     return await this.parkingRecordsService.getMostRegisteredVehiclesAtAllParking();
   }
+  
+  // Find the 10 vehicles that have been registered the most times in a specific parking lot and how many times they have been registered.
+  @Get('parked-vehicles/most-registered/parkingId/:parkingId')
+  @Roles('SOCIO', 'ADMIN')
+  @HttpCode(200)
+  async getMostRegisteredVehiclesAtAllParkingByParkingId(@Param('parkingId') parkingId: number) : Promise<VehicleResponseDto[]> {
+    return await this.parkingRecordsService.getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId);
+  }
 
-  // // Find the 10 vehicles that have been registered the most times in a specific parking lot and how many times they have been registered.
-  // @Get('parked-vehicles/most-registered/parkingId/:parkingId')
-  // @Roles('SOCIO', 'ADMIN')
-  // @HttpCode(200)
-  // async getMostRegisteredVehiclesAtAllParkingByParkingId(@Param('parkingId') parkingId: number) : Promise<VehicleResponseDto[]> {
-  //   return await this.parkingRecordsService.getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId);
-  // }
-
-  // // Obtain vehicles parked for the first time in that parking lot.
-  // @Get('parked-vehicles/first-time/parkingId/:parkingId')
-  // @Roles('SOCIO', 'ADMIN')
-  // @HttpCode(200)
-  // async getParkingRecordsFirstTimeWithExitDateNullByParkingId(@Param('parkingId') parkingId: number) : Promise<ParkingRecordEntryResponseDto[]> {
-  //   return await this.parkingRecordsService.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId);
-  // }
+  // Obtain vehicles parked for the first time in that parking lot.
+  @Get('parked-vehicles/first-time/parkingId/:parkingId')
+  @Roles('SOCIO', 'ADMIN')
+  @HttpCode(200)
+  async getParkingRecordsFirstTimeWithExitDateNullByParkingId(@Param('parkingId') parkingId: number) : Promise<ParkingRecordEntryResponseDto[]> {
+    return await this.parkingRecordsService.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId);
+  }
 
   // // Search for parked vehicles by license plate match
   // @Get('parked-vehicles/matches/plate/:plate')

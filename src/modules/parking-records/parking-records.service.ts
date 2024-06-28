@@ -166,6 +166,68 @@ export class ParkingRecordsService {
     return vehicles.map(this.toVehicleResponseDto);
   }
 
+  /**
+   * (ADMIN and SOCIO) return the 10 vehicles that have been registered the most times in a parking 
+   * lot and how many times they have been registered.
+   */
+
+  public async getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId : number) : Promise<VehicleResponseDto[]> {
+    const userId: number = await this.tokensService.getUserIdByRequestToken();
+    const userRole: string = await this.tokensService.getRoleByRequestToken();
+
+    const parking : ParkingEntity = await this.parkingService.getParkingEntityById(parkingId);
+
+    if (userRole !== ROLES.ADMIN && parking.user.id != userId) {
+      throw new ParkingNotAssignedException();
+    }
+
+    const vehicles : object[] = userRole === ROLES.ADMIN ?
+      await this.parkingRecordRepository.getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId) :
+      await this.parkingRecordRepository.getMostRegisteredVehiclesAtAllParkingByParkingIdAndUserId(parkingId, userId);
+
+    return vehicles.map(this.toVehicleResponseDto);
+  
+  }
+
+  /**
+   * (ADMIN and SOCIO) verify which vehicles are parked for the first time in that parking lot.
+   */
+
+  public async getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId : number) : Promise<ParkingRecordEntryResponseDto[]> {
+    const userId: number = await this.tokensService.getUserIdByRequestToken();
+    const userRole: string = await this.tokensService.getRoleByRequestToken();
+
+    const parking : ParkingEntity = await this.parkingService.getParkingEntityById(parkingId);
+
+    if (userRole !== ROLES.ADMIN && parking.user.id != userId) {
+      throw new ParkingNotAssignedException();
+    }
+
+    const parkingRecords : ParkingRecordEntity[] = userRole === ROLES.ADMIN ?
+      await this.parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId) :
+      await this.parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId, userId);
+
+    return parkingRecords.map(this.toParkingRecordEntryResponseDto);
+  }
+
+
+
+  // public List<ParkingRecordResponseDto> getParkingRecordsFirstTimeWithExitDateNullByParkingId(Long parkingId) {
+    //         String token = tokenService.getToken();
+    //         Long userId = tokenService.getUserIdByToken(token);
+    //         String userRole = tokenService.getUserRoleByToken(token);
+    
+    //         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, parkingId);
+    
+    //         List<ParkingRecord> parkingRecords = userRole.equals(RoleEnum.ADMIN.getRole()) ?
+    //             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId) :
+    //             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId, userId);
+    
+    //         return parkingRecords.stream()
+    //             .map(this::toParkingRecordResponseDto)
+    //             .toList();
+    //     }
+
   // ================================= AUXILIARY METHODS =================================
 
   private toParkingRecordEntryResponseDto(record : ParkingRecordEntity) : ParkingRecordEntryResponseDto {
@@ -187,9 +249,9 @@ export class ParkingRecordsService {
 
   private toVehicleResponseDto(vehicle : object) : VehicleResponseDto {
     return new VehicleResponseDto(
-      vehicle['id'],
-      vehicle['plate'],
-      vehicle['recordCount']
+      vehicle['vehicle_id'],
+      vehicle['vehicle_plate'],
+      vehicle['recordcount']
     );
   }
 
@@ -211,49 +273,8 @@ export class ParkingRecordsService {
 
 //     // ================================= INDICATORS =================================
 
-//     /**
-//      * (ADMIN and SOCIO) return the 10 vehicles that have been registered the most times in the different parking lots and how many
-//      * times they have been registered different parking lots and how many times they have been
-//      */
 
-//     @Override
-//     public List<VehicleResponseDto> getMostRegisteredVehiclesAtAllParking() {
-//         String token = tokenService.getToken();
-//         Long userId = tokenService.getUserIdByToken(token);
-//         String userRole = tokenService.getUserRoleByToken(token);
 
-//         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, null);
-        
-//         List<Object[]> vehicles = userRole.equals(RoleEnum.ADMIN.getRole()) ?
-//             parkingRecordRepository.getMostRegisteredVehiclesAtAllParking() :
-//             parkingRecordRepository.getMostRegisteredVehiclesAtAllParkingByUserId(userId);
-
-//         return vehicles.stream()
-//             .map(this::toVehicleResponseDto)
-//             .toList();
-//     }
-
-//     /**
-//      * (ADMIN and SOCIO) return the 10 vehicles that have been registered the most times in a parking 
-//      * lot and how many times they have been registered.
-//      */
-
-//     @Override
-//     public List<VehicleResponseDto> getMostRegisteredVehiclesAtAllParkingByParkingId(Long parkingId) {
-//         String token = tokenService.getToken();
-//         Long userId = tokenService.getUserIdByToken(token);
-//         String userRole = tokenService.getUserRoleByToken(token);
-
-//         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, parkingId);
-
-//         List<Object[]> vehicles = userRole.equals(RoleEnum.ADMIN.getRole()) ?
-//             parkingRecordRepository.getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId) :
-//             parkingRecordRepository.getMostRegisteredVehiclesAtAllParkingByParkingIdAndUserId(parkingId, userId);
-
-//         return vehicles.stream()
-//             .map(this::toVehicleResponseDto)
-//             .toList();
-//     }
     
 //     /**
 //      * (ADMIN and SOCIO) verify which vehicles are parked for the first time in that parking lot.
