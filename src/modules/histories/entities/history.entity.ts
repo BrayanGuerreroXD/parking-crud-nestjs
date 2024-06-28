@@ -1,5 +1,5 @@
-import { BaseEntity } from "src/config/base.entity";
-import { ParkingRecordEntity } from "src/modules/parking-records/entities/parking.record.entity";
+import { BaseEntity } from "../../../config/base.entity";
+import { ParkingRecordEntity } from "../../../modules/parking-records/entities/parking.record.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity("history")

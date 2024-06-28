@@ -1,6 +1,6 @@
-import { BaseEntity } from "src/config/base.entity";
-import { ParkingEntity } from "src/modules/parkings/entities/parking.entity";
-import { VehicleEntity } from "src/modules/vehicles/entities/vehicle.entity";
+import { BaseEntity } from "../../../config/base.entity";
+import { ParkingEntity } from "../../../modules/parkings/entities/parking.entity";
+import { VehicleEntity } from "../../../modules/vehicles/entities/vehicle.entity";
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity("parkingrecord")
