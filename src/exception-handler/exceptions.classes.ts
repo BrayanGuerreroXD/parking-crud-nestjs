@@ -72,6 +72,13 @@ class VehicleNotFoundException extends NotFoundException {
     }
 }
 
+class MailApiNotAvailableException extends InternalServerErrorException {
+    constructor() {
+        super('Mail API not available');
+    }
+
+}
+
 export {
     EmailAlreadyExistsException,
     EmailNotFoundException,
@@ -84,4 +91,5 @@ export {
     TokenNullException,
     ParkingIsFullException,
     VehicleNotFoundException,
+    MailApiNotAvailableException
 }

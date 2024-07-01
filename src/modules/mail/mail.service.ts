@@ -1,7 +1,11 @@
+import { 
+  EmailNotFoundException, 
+  MailApiNotAvailableException, 
+  NotSendMailException 
+} from 'src/exception-handler/exceptions.classes';
 import { Injectable } from '@nestjs/common';
 import { MailResponseDto } from './dto/mail.response.dto';
 import { MailRequestDto } from './dto/mail.request.dto';
-import { EmailNotFoundException, NotSendMailException } from 'src/exception-handler/exceptions.classes';
 import { ParkingsService } from '../parkings/parkings.service';
 import { UsersService } from '../users/users.service';
 import { ParkingEntity } from '../parkings/entities/parking.entity';
@@ -33,11 +37,11 @@ export class MailService {
 
     const headers = { 'Content-Type': 'application/json' };
 
-    let response;
+    let response: fetch.Response;
     try {
       response = await fetch(uri, { method: 'post', body, headers });
     } catch (e) {
-     throw e; 
+      throw new MailApiNotAvailableException();
     }
     
     if (!response.ok) 

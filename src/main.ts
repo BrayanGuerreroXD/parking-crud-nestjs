@@ -4,7 +4,7 @@ import { AppModule } from './app.module';
 import * as morgan from 'morgan';
 import { CORS } from './constants/cors';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { HttpExceptionFilter } from './exception-handler/http.exception.filter';
+import { GlobalExceptionFilter } from './exception-handler/global.exception.filter';
 
 async function bootstrap() {
 
@@ -41,7 +41,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const port = configService.get('PORT');
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new GlobalExceptionFilter());
 
   app.enableCors(CORS);
 
