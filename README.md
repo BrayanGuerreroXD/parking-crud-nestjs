@@ -141,7 +141,7 @@ ___
 
    After both projects are running, it is time to test the http requests to determine the correct functioning of the API. The order of the Postman collection looks as follows:
 
-   ![postman collection](https://github.com/BrayanGuerreroXD/parking-crud-spring-boot/blob/master/src/main/resources/postman%20http%20request.png)
+   ![postman collection](https://github.com/BrayanGuerreroXD/parking-crud-nestjs/blob/main/postman-collection.png)
 
    To obtain the authorization token for the ADMIN user is with the Login request, this token is obtained and can be added to each of the other requests in the ADMIN directory in the Bearer Token of type Authorization.
 
