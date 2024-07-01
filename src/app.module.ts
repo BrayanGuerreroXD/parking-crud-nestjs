@@ -10,6 +10,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { ParkingRecordsModule } from './modules/parking-records/parking-records.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { AuthModule } from './modules/auth/auth.module';
     HistoriesModule,
     ParkingsModule,
     ParkingRecordsModule,
+    MailModule,
   ],
 })
 export class AppModule {}

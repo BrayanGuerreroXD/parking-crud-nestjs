@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { UserEntity } from './entities/user.entity';
 import { UserRequestDto } from './dto/user.request.dto';
 import * as bcrypt from 'bcrypt';
@@ -72,7 +72,7 @@ export class UsersService {
         return user;
     }
 
-    private async existEmail(email: string): Promise<boolean> {
+    public async existEmail(email: string): Promise<boolean> {
         const count = await this.userRepository.count({ where: { email } });
         return count > 0;
     }

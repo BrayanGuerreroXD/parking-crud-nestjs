@@ -12,5 +12,6 @@ declare namespace NodeJS {
         JWT_SECRET: string;
         NUMBER_SESSIONS: number;
         EXPIRATION_TIME: string;
+        URL_API_MAIL: string;
     }
 }

@@ -7,6 +7,24 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './exception-handler/http.exception.filter';
 
 async function bootstrap() {
+
+  // Check required environment variables
+  const requiredEnvVars = ['PORT', 'DB_HOST', 'DB_PORT', 'DB_USER', 'DB_PASSWORD', 'DB_NAME'];
+  requiredEnvVars.forEach((envVar) => {
+    if (!process.env[envVar]) {
+      throw new Error(`Missing required environment variable: ${envVar}`);
+    }
+  });
+
+  // Uncaught exception and unhandled rejection handlers
+  process.on('uncaughtException', (err) => {
+    console.error('Uncaught Exception:', err);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  });
+  
   const app = await NestFactory.create(AppModule);
 
   app.use(morgan('dev'));

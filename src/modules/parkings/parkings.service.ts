@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ParkingEntity } from './entities/parking.entity';
 import { DataSource } from 'typeorm';
 import { ParkingRequestDto } from './dto/parking.request.dto';
