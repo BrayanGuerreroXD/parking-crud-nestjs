@@ -30,10 +30,10 @@ This model outlines the relationships and structure of entities within the datab
 ___
 ### Technologies:
 
-- [TypeScript](https://www.typescriptlang.org/ "TypeScript"): TypeScript is required to develop and run the API.
-- [Node.js](https://nodejs.org/ "Node.js"): Node.js runtime is required to use the API.
-- [NestJS](https://nestjs.com/ "NestJS"): NestJS framework is used to build the API.
-- [PostgreSQL](https://www.postgresql.org/ "PostgreSQL"): PostgreSQL is used as the relational database management system for storing data related to parking operations.
+- [TypeScript v5.1.3](https://www.typescriptlang.org/ "TypeScript"): TypeScript version 5.1.3 or higher is required for developing and running the API.
+- [Node.js v20.15.0](https://nodejs.org/ "Node.js"): Node.js version 20.15.0 or higher runtime is required to use the API.
+- [NestJS v10.3.9](https://nestjs.com/ "NestJS"): NestJS version 10.3.9 or higher framework is used to build the API.
+- [PostgreSQL v16.3](https://www.postgresql.org/ "PostgreSQL"): PostgreSQL version 16.3 or higher is used as the relational database management system for storing data related to parking operations.
 
 |Backend|
 |---|
