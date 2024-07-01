@@ -101,7 +101,7 @@ ___
    To generate the migrations of the entities, you must create a folder in src called migrations: `src/migrations` and place the following command:
 
    ```bash
-   npm run m:gen -- src/migrations/InitDB
+   $ npm run m:gen -- src/migrations/InitDB
    ```
 
    Once the migration is generated, run it to apply the changes to the database:
