@@ -12,10 +12,7 @@ export class ParkingRecordEntity extends BaseEntity {
     })
     entryDate!: Date;
 
-    @Column({
-        nullable: true,
-        default: () => "CURRENT_TIMESTAMP",
-    })
+    @Column({nullable: true})
     exitDate!: Date;
 
     @ManyToOne(() => VehicleEntity, {nullable: false})

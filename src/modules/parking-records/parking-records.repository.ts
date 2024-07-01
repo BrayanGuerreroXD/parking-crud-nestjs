@@ -15,6 +15,23 @@ export class ParkingRecordRepository extends Repository<ParkingRecordEntity> {
         );
     }
 
+    async saveParkingRecord(parkingRecord: ParkingRecordEntity): Promise<ParkingRecordEntity> {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const result = await queryRunner.manager.save(parkingRecord);
+            await queryRunner.commitTransaction();
+            return result;
+        } catch (e) {
+            if (queryRunner.isTransactionActive)
+                await queryRunner.rollbackTransaction();
+            throw e;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
     async countByParkingIdAndExitDateIsNull(parkingId: number): Promise<number> {
         return await this.repository.count({
             where: {

@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ParkingsService } from '../parkings/parkings.service';
 import { TokensService } from '../tokens/tokens.service';
-import { DataSource } from 'typeorm';
 import { ParkingRecordRepository } from './parking-records.repository';
 import { VehiclesService } from '../vehicles/vehicles.service';
 import { ParkingRecordRequestDto } from './dto/parking-record.request.dto';
@@ -23,112 +22,85 @@ export class ParkingRecordsService {
     private readonly vehicleService : VehiclesService,
     private readonly tokensService : TokensService,
     private readonly historiesService : HistoriesService,
-    private readonly dataSource : DataSource
   ) {}
 
   public async createParkingEntryRecord(body : ParkingRecordRequestDto) : Promise<ParkingRecordEntryResponseDto> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-        const parking : ParkingEntity = await this.parkingService.getParkingEntityById(body.parkingId);
+      const parking : ParkingEntity = await this.parkingService.getParkingEntityById(body.parkingId);
 
-        const userId: number = await this.tokensService.getUserIdByRequestToken();
-        if (parking.user.id != userId) {  
-          throw new ParkingNotAssignedException();
-        }
-
-        const parkingCapacity = parking.maxParkingSpace;
-        const parkingRecordsCount = await this.parkingRecordRepository.countByParkingIdAndExitDateIsNull(parking.id);
-
-        if(parkingCapacity > 0 && parkingRecordsCount === parkingCapacity) {
-          throw new ParkingIsFullException();
-        }
-
-        const lastRecord : ParkingRecordEntity = await this.parkingRecordRepository.getLastParkingRecordByVehiclesPlate(body.plate);
-
-        let vehicle = null;
-        if (!lastRecord) {
-          vehicle = await this.vehicleService.createVehicle(body.plate);
-        } else {
-          if (!lastRecord.exitDate) {
-            throw new BadRequestException("Unable to Register Entry, vehicle already in a parking lot.");
-          }
-          vehicle = lastRecord.vehicle;
-        }
-
-        const parkingRecordEntity : ParkingRecordEntity = new ParkingRecordEntity();
-        parkingRecordEntity.vehicle = vehicle;
-        parkingRecordEntity.parking = parking;
-        parkingRecordEntity.entryDate = new Date();
-
-        const savedParkingRecord = await queryRunner.manager.save(parkingRecordEntity);
-
-        const response = new ParkingRecordEntryResponseDto(
-          savedParkingRecord.id,
-          savedParkingRecord.vehicle.plate,
-          savedParkingRecord.entryDate
-        );
-
-        await queryRunner.commitTransaction();
-
-        return response;
-      } catch (e) {
-          await queryRunner.rollbackTransaction();
-          throw e;
-      } finally {
-          await queryRunner.release();
+      const userId: number = await this.tokensService.getUserIdByRequestToken();
+      if (parking.user.id != userId) {  
+        throw new ParkingNotAssignedException();
       }
+
+      const parkingCapacity = parking.maxParkingSpace;
+      const parkingRecordsCount = await this.parkingRecordRepository.countByParkingIdAndExitDateIsNull(parking.id);
+
+      if(parkingCapacity > 0 && parkingRecordsCount === parkingCapacity) {
+        throw new ParkingIsFullException();
+      }
+
+      const lastRecord : ParkingRecordEntity = await this.parkingRecordRepository.getLastParkingRecordByVehiclesPlate(body.plate);
+
+      let vehicle = null;
+      if (!lastRecord) {
+        vehicle = await this.vehicleService.createVehicle(body.plate);
+      } else {
+        if (!lastRecord.exitDate) {
+          throw new BadRequestException("Unable to Register Entry, vehicle already in a parking lot.");
+        }
+        vehicle = lastRecord.vehicle;
+      }
+
+      const parkingRecordEntity : ParkingRecordEntity = new ParkingRecordEntity();
+      parkingRecordEntity.vehicle = vehicle;
+      parkingRecordEntity.parking = parking;
+
+      const savedParkingRecord = await this.parkingRecordRepository.saveParkingRecord(parkingRecordEntity);
+
+      const response = new ParkingRecordEntryResponseDto(
+        savedParkingRecord.id,
+        savedParkingRecord.vehicle.plate,
+        savedParkingRecord.entryDate
+      );
+
+      return response;
   }
   
   public async createParkingExitRecord(body : ParkingRecordRequestDto) : Promise<ParkingRecordExitResponseDto> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-        const vehicleExists = await this.vehicleService.existsVehicleByPlate(body.plate);
-        if (!vehicleExists)
-            throw new VehicleNotFoundException();
+      const vehicleExists = await this.vehicleService.existsVehicleByPlate(body.plate);
+      if (!vehicleExists)
+          throw new VehicleNotFoundException();
 
-        const parking : ParkingEntity = await this.parkingService.getParkingEntityById(body.parkingId);
+      const parking : ParkingEntity = await this.parkingService.getParkingEntityById(body.parkingId);
 
-        const userId: number = await this.tokensService.getUserIdByRequestToken();
-        if (parking.user.id != userId) {
-          throw new ParkingNotAssignedException();
-        }
-
-        const lastRecord : ParkingRecordEntity = await this.parkingRecordRepository.getLastParkingRecordByVehiclesPlate(body.plate);
-
-        if (!lastRecord)
-          throw new BadRequestException("Unable to Register Exit, no license plate found in any parking lot.");
-
-        if (lastRecord.parking.id !== parking.id)
-          throw new BadRequestException("Unable to Register Exit, vehicle license plate in another parking lot.");
-
-        if (lastRecord.exitDate)
-          throw new BadRequestException("Unable to Register Exit, vehicle not found in a parking lot.");
-
-        lastRecord.exitDate = new Date();
-
-        const updatedParkingRecord = await queryRunner.manager.save(lastRecord);
-
-        await this.saveHistory(updatedParkingRecord);
-
-        await queryRunner.commitTransaction();
-
-        return new ParkingRecordExitResponseDto(
-          updatedParkingRecord.id,
-          updatedParkingRecord.vehicle.plate,
-          updatedParkingRecord.entryDate,
-          updatedParkingRecord.exitDate,
-        );
-
-      } catch (e) {
-          await queryRunner.rollbackTransaction();
-          throw e;
-      } finally {
-          await queryRunner.release();
+      const userId: number = await this.tokensService.getUserIdByRequestToken();
+      if (parking.user.id != userId) {
+        throw new ParkingNotAssignedException();
       }
+
+      const lastRecord : ParkingRecordEntity = await this.parkingRecordRepository.getLastParkingRecordByVehiclesPlate(body.plate);
+
+      if (!lastRecord)
+        throw new BadRequestException("Unable to Register Exit, no license plate found in any parking lot.");
+
+      if (lastRecord.parking.id !== parking.id)
+        throw new BadRequestException("Unable to Register Exit, vehicle license plate in another parking lot.");
+
+      if (lastRecord.exitDate)
+        throw new BadRequestException("Unable to Register Exit, vehicle not found in a parking lot.");
+
+      lastRecord.exitDate = new Date();
+
+      const updatedParkingRecord = await this.parkingRecordRepository.saveParkingRecord(lastRecord);
+
+      await this.saveHistory(updatedParkingRecord);
+
+      return new ParkingRecordExitResponseDto(
+        updatedParkingRecord.id,
+        updatedParkingRecord.vehicle.plate,
+        updatedParkingRecord.entryDate,
+        updatedParkingRecord.exitDate,
+      );
   }
 
   // (ADMIN and SOCIO) return all the vehicles that are parked in a parking lot and have not yet left.

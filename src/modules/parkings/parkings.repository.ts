@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ParkingEntity } from "./entities/parking.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -6,12 +6,45 @@ export class ParkingRepository extends Repository<ParkingEntity> {
     constructor(
         @InjectRepository(ParkingEntity)
         private repository: Repository<ParkingEntity>,
+        private readonly dataSource: DataSource
     ) {
         super(
             repository.target,
             repository.manager,
             repository.queryRunner,
         );
+    }
+
+    async saveParking(parking: ParkingEntity): Promise<ParkingEntity> {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            const savedParking = await queryRunner.manager.save(parking);
+            await queryRunner.commitTransaction();
+            return savedParking;
+        } catch (e) {
+            if (queryRunner.isTransactionActive)
+                await queryRunner.rollbackTransaction();
+            throw e;
+        } finally {
+            await queryRunner.release();
+        }
+    }
+
+    async deleteParking(id: number): Promise<void> {
+        const queryRunner = this.dataSource.createQueryRunner();
+        await queryRunner.connect();
+        await queryRunner.startTransaction();
+        try {
+            await queryRunner.manager.delete(ParkingEntity, id);
+            await queryRunner.commitTransaction();
+        } catch (e) {
+            await queryRunner.rollbackTransaction();
+            throw e;
+        } finally {
+            await queryRunner.release();
+        }
     }
 
     async findParkingById(id: number): Promise<ParkingEntity> {

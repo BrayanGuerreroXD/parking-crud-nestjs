@@ -11,23 +11,11 @@ export class HistoriesService {
   constructor(
     private readonly historiesRepository : HistoriesRepository,
     private readonly parkingService : ParkingsService,
-    private readonly tokensService : TokensService,
-    private readonly dataSource : DataSource
+    private readonly tokensService : TokensService
   ) {}
 
   public async createHistory(body : HistoryEntity) : Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.manager.save(body);
-      await queryRunner.commitTransaction();
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
+    await this.historiesRepository.saveHistory(body);
   }
 
   // ======================== INDICATOR ========================

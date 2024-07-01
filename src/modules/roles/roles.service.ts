@@ -1,21 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from './entities/role.entity';
-import { Repository } from 'typeorm';
 import { EntityNotFoundException } from 'src/exception-handler/exceptions.classes';
+import { RolesRepository } from './roles.repository';
 
 @Injectable()
 export class RolesService {
     constructor(
-        @InjectRepository(RoleEntity) private readonly roleRepository: Repository<RoleEntity>,
+        private readonly roleRepository: RolesRepository,
     ) {}
 
     public async findByName(name: string): Promise<RoleEntity> {
         try {
-            const role: RoleEntity = await this.roleRepository
-                .createQueryBuilder('role')
-                .where({ name })
-                .getOne();
+            const role: RoleEntity = await this.roleRepository.findRoleByName(name);
 
             if (!role) 
               throw new EntityNotFoundException('Role not found');

@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ParkingEntity } from './entities/parking.entity';
-import { DataSource } from 'typeorm';
 import { ParkingRequestDto } from './dto/parking.request.dto';
 import { ParkingResponseDto } from './dto/parking.response.dto';
 import { UsersService } from 'src/modules/users/users.service';
@@ -17,87 +16,60 @@ export class ParkingsService {
     private readonly parkingRepository: ParkingRepository,
     private readonly usersService: UsersService,
     private readonly tokensService : TokensService,
-    private readonly dataSource: DataSource
   ) {}
   
   public async createParking(body: ParkingRequestDto) : Promise<ParkingResponseDto> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-        const parkingEntity: ParkingEntity = new ParkingEntity();
-        const user = await this.usersService.findUserById(body.userId);
+      const parkingEntity: ParkingEntity = new ParkingEntity();
+      const user = await this.usersService.findUserById(body.userId);
 
-        if (user?.role?.name !== ROLES.SOCIO) {
-          throw new BadRequestException("User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking");
-        }
-
-        parkingEntity.name = body.name;
-        parkingEntity.hourlyCost = body.hourlyCost;
-        parkingEntity.maxParkingSpace = body.maxParkingSpace;
-        parkingEntity.user = user;
-        
-        const savedParking = await queryRunner.manager.save(parkingEntity);
-
-        const response = plainToInstance(ParkingResponseDto, savedParking, {
-          excludeExtraneousValues: true,
-        });
-
-        await queryRunner.commitTransaction();
-
-        return response;
-      } catch (e) {
-          await queryRunner.rollbackTransaction();
-          throw e;
-      } finally {
-          await queryRunner.release();
-      }
-  }
-
-  public async updateParking(idParking: number, body: ParkingRequestDto) : Promise<ParkingResponseDto> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      if (idParking == null || idParking <= 0)
-        throw new BadRequestException("The parking id cannot be null or less than or equal to 0");
-
-      const parkingEntity: ParkingEntity = await this.parkingRepository.findParkingById(idParking);
-
-      if (!parkingEntity) 
-        throw new ParkingNotExistsException();
-
-      // If the user is different from the one that is assigned to the parking, then it is updated
-      if (body.userId !== parkingEntity.user.id) {
-        const user = await this.usersService.findUserById(body.userId);
-        // If the user is ADMIN then it throws an exception because only the user with role 'SOCIO' can be assigned to the parking
-        if (user?.role?.name !== ROLES.SOCIO) {
-          throw new BadRequestException("User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking");
-        }
-        parkingEntity.user = user;
+      if (user?.role?.name !== ROLES.SOCIO) {
+        throw new BadRequestException("User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking");
       }
 
       parkingEntity.name = body.name;
       parkingEntity.hourlyCost = body.hourlyCost;
       parkingEntity.maxParkingSpace = body.maxParkingSpace;
+      parkingEntity.user = user;
+      
+      const savedParking = await this.parkingRepository.saveParking(parkingEntity);
 
-      const updatedParking : ParkingEntity = await queryRunner.manager.save(parkingEntity);
-
-      const response = plainToInstance(ParkingResponseDto, updatedParking, {
+      const response = plainToInstance(ParkingResponseDto, savedParking, {
         excludeExtraneousValues: true,
       });
 
-      await queryRunner.commitTransaction();
-
       return response;
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
+  }
+
+  public async updateParking(idParking: number, body: ParkingRequestDto) : Promise<ParkingResponseDto> {
+    if (idParking == null || idParking <= 0)
+      throw new BadRequestException("The parking id cannot be null or less than or equal to 0");
+
+    const parkingEntity: ParkingEntity = await this.parkingRepository.findParkingById(idParking);
+
+    if (!parkingEntity) 
+      throw new ParkingNotExistsException();
+
+    // If the user is different from the one that is assigned to the parking, then it is updated
+    if (body.userId !== parkingEntity.user.id) {
+      const user = await this.usersService.findUserById(body.userId);
+      // If the user is ADMIN then it throws an exception because only the user with role 'SOCIO' can be assigned to the parking
+      if (user?.role?.name !== ROLES.SOCIO) {
+        throw new BadRequestException("User isn't a 'SOCIO', only users with role 'SOCIO' can be assigned to the parking");
+      }
+      parkingEntity.user = user;
     }
 
+    parkingEntity.name = body.name;
+    parkingEntity.hourlyCost = body.hourlyCost;
+    parkingEntity.maxParkingSpace = body.maxParkingSpace;
+
+    const updatedParking : ParkingEntity = await this.parkingRepository.saveParking(parkingEntity);
+
+    const response = plainToInstance(ParkingResponseDto, updatedParking, {
+      excludeExtraneousValues: true,
+    });
+
+    return response;
   }
 
   public async getParkingById(id: number) : Promise<ParkingResponseDto> {
@@ -154,28 +126,15 @@ export class ParkingsService {
   }
 
   public async deleteParking(id: number) : Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      if (id == null || id <= 0)
-        throw new BadRequestException("The parking id cannot be null or less than or equal to 0");
+    if (id == null || id <= 0)
+      throw new BadRequestException("The parking id cannot be null or less than or equal to 0");
 
-      const parkingEntity: ParkingEntity = await this.parkingRepository.findParkingById(id);
+    const parkingEntity: ParkingEntity = await this.parkingRepository.findParkingById(id);
 
-      if (!parkingEntity)
-        throw new ParkingNotExistsException();
+    if (!parkingEntity)
+      throw new ParkingNotExistsException();
 
-      await queryRunner.manager.delete(ParkingEntity, id);
-
-      await queryRunner.commitTransaction();
-      
-    } catch (e) {
-      await queryRunner.rollbackTransaction();
-      throw e;
-    } finally {
-      await queryRunner.release();
-    }
+    await this.parkingRepository.deleteParking(id);
   }
 
   // Validate if the parking is assigned to the user

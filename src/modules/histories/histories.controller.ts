@@ -9,12 +9,6 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class HistoriesController {
   constructor(private readonly historiesService: HistoriesService) {}
 
-  // @GetMapping("/earnings/parkingId/{parkingId}")
-  //   @PreAuthorize("hasAuthority('SOCIO')")
-  //   public ResponseEntity<Object> getEarnings(@PathVariable Long parkingId) {
-  //       return ResponseEntity.status(HttpStatus.OK).body(historyService.getEarnings(parkingId));
-  //   }
-
     @Get("earnings/parkingId/:parkingId")
     @Roles('SOCIO')
     public async getEarnings(@Param('parkingId') parkingId: number) {

@@ -1,26 +1,23 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CreateTokenDto } from './dto/create-token.dto';
 import { TokenEntity } from './entities/token.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { useToken } from 'src/utils/user.token';
 import { UserEntity } from 'src/modules/users/entities/user.entity';
 import { InvalidTokenException, JwtAuthException } from 'src/exception-handler/exceptions.classes';
 import { IUseToken } from '../auth/interfaces/auth.interface';
-
 import { Request } from 'express';
-
+import { TokensRepository } from './tokens.repository';
 
 @Injectable()
 export class TokensService {
 
     constructor(
-        @InjectRepository(TokenEntity) private readonly tokenRepository : Repository<TokenEntity>,
+        private readonly tokenRepository: TokensRepository,
         @Inject('REQUEST') private readonly request: Request,
     ) {}
 
     public async createToken(createTokenDto: CreateTokenDto) {
-        const tokens = await this.findAllByUserId(createTokenDto.user);
+        const tokens = await this.tokenRepository.findAllByUserId(createTokenDto.user);
         const NUMBER_SESSIONS = process.env.NUMBER_SESSIONS;
 
         tokens.forEach((token, index) => {
@@ -46,15 +43,15 @@ export class TokensService {
         token.value = createTokenDto.value;
         token.user = user;
 
-        await this.tokenRepository.save(token);
+        await this.tokenRepository.saveToken(token);
     }
 
-    public async removeToken(toke: string) {
-        const manageToken: IUseToken = useToken(toke);
+    public async removeToken(value: string) {
+        const manageToken: IUseToken = useToken(value);
         const userId = +manageToken.sub;
         if (manageToken.isExpired)
             throw new JwtAuthException('Token is expired');
-        await this.removeTokenByValueAndUserId(toke, userId);
+        await this.removeTokenByValueAndUserId(value, userId);
     }
 
     // Get the role of the user by the string token
@@ -98,32 +95,14 @@ export class TokensService {
     public async existsToken(token: string): Promise<boolean> {
         const manageToken: IUseToken = useToken(token);
         const userId = +manageToken.sub;
-    
-        const tokenExists = await this.tokenRepository
-            .createQueryBuilder('token')
-            .leftJoin('token.user', 'user')
-            .where('token.value = :token', { token })
-            .andWhere('user.id = :userId', { userId })
-            .getCount() > 0;
-    
-        return tokenExists;
+        return await this.tokenRepository.existsByValueAndUserId(token, userId);
     }
 
     private async removeTokenByValueAndUserId(value: string, userId: number) {
-        const token = await this.tokenRepository.createQueryBuilder('token')
-            .leftJoinAndSelect('token.user', 'user')
-            .where('token.value = :value', { value })
-            .andWhere('user.id = :userId', { userId })
-            .getOne();
+        const token = await this.tokenRepository.findByValueAndUserId(value, userId);
         if (!token)
             throw new JwtAuthException('Token not found');
-        await this.tokenRepository.remove(token);
+        await this.tokenRepository.removeToken(value, userId);
     }    
-
-    private async findAllByUserId(userId: number): Promise<TokenEntity[]> {
-        return await this.tokenRepository.createQueryBuilder('token')
-            .where('token.user.id = :userId', { userId })
-            .getMany();
-    }
 
 }

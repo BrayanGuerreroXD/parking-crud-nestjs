@@ -8,54 +8,38 @@ import { UserResponseDto } from './dto/user.response.dto';
 import { plainToInstance } from 'class-transformer';
 import { EmailAlreadyExistsException, EntityNotFoundException } from 'src/exception-handler/exceptions.classes';
 import { UserRepository } from './users.repository';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class UsersService {
 
     constructor(
         private readonly userRepository : UserRepository,
-        private readonly rolesService: RolesService,
-        private readonly dataSource: DataSource
+        private readonly rolesService: RolesService
     ) {}
     
     public async createUser(body: UserRequestDto): Promise<UserResponseDto> {
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-        try {
-            const emailAlreadyExists = await this.existEmail(body.email);
-    
-            if (emailAlreadyExists) {
-                throw new EmailAlreadyExistsException();
-            }
-    
-            const role = await this.rolesService.findByName(ROLES.SOCIO);
-    
-            const encryptPass = await bcrypt.hash(body.password, +process.env.HASH_SALT || 10);
+        const emailAlreadyExists = await this.existEmail(body.email);
 
-            const userEntity: UserEntity = new UserEntity();
-            userEntity.email = body.email;
-            userEntity.password = encryptPass;
-            userEntity.role = role;
-    
-            const savedUser = await queryRunner.manager.save(userEntity);
-
-            const userResponseDto = plainToInstance(UserResponseDto, savedUser, {
-                excludeExtraneousValues: true,
-            });
-
-            await queryRunner.commitTransaction();
-
-            return userResponseDto;
-        } catch (e) {
-            if (queryRunner.isTransactionActive) {
-                await queryRunner.rollbackTransaction();
-            }
-            throw e;
-        } finally {
-            await queryRunner.release();
+        if (emailAlreadyExists) {
+            throw new EmailAlreadyExistsException();
         }
+
+        const role = await this.rolesService.findByName(ROLES.SOCIO);
+
+        const encryptPass = await bcrypt.hash(body.password, +process.env.HASH_SALT || 10);
+
+        const userEntity: UserEntity = new UserEntity();
+        userEntity.email = body.email;
+        userEntity.password = encryptPass;
+        userEntity.role = role;
+
+        const savedUser = await this.userRepository.saveUser(userEntity);
+
+        const userResponseDto = plainToInstance(UserResponseDto, savedUser, {
+            excludeExtraneousValues: true,
+        });
+
+        return userResponseDto;
     }
     
     public async findUserById(id: number): Promise<UserEntity> {
