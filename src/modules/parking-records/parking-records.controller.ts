@@ -60,12 +60,12 @@ export class ParkingRecordsController {
     return await this.parkingRecordsService.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId);
   }
 
-  // // Search for parked vehicles by license plate match
-  // @Get('parked-vehicles/matches/plate/:plate')
-  // @Roles('SOCIO', 'ADMIN')
-  // @HttpCode(200)
-  // async getParkingRecordsByVehiclePlateMatches(@Param('plate') plate: string) : Promise<ParkingRecordEntryResponseDto[]> {
-  //   return await this.parkingRecordsService.getParkingRecordsByVehiclePlateMatches(plate);
-  // }
+  // Search for parked vehicles by license plate match
+  @Get('parked-vehicles/matches/plate/:plate')
+  @Roles('SOCIO', 'ADMIN')
+  @HttpCode(200)
+  async getParkingRecordsByVehiclePlateMatches(@Param('plate') plate: string) : Promise<ParkingRecordEntryResponseDto[]> {
+    return await this.parkingRecordsService.getParkingRecordsByVehiclePlateMatches(plate);
+  }
 
 }

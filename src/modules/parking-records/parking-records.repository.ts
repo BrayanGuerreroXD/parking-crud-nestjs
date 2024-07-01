@@ -1,4 +1,4 @@
-import { Repository } from "typeorm";
+import { DataSource, Repository } from "typeorm";
 import { ParkingRecordEntity } from "./entities/parking.record.entity";
 import { InjectRepository } from "@nestjs/typeorm";
 
@@ -6,6 +6,7 @@ export class ParkingRecordRepository extends Repository<ParkingRecordEntity> {
     constructor(
         @InjectRepository(ParkingRecordEntity)
         private repository: Repository<ParkingRecordEntity>,
+        private readonly dataSource : DataSource
     ) {
         super(
             repository.target,
@@ -129,75 +130,63 @@ export class ParkingRecordRepository extends Repository<ParkingRecordEntity> {
      * (ADMIN and SOCIO) verify which vehicles are parked for the first time in that parking lot.
      */
 
-    // async getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId: number) : Promise<ParkingRecordEntity[]> {
-    //     return await this.repository.createQueryBuilder('parkingRecord')
-    //         .leftJoinAndSelect('parkingRecord.vehicle', 'vehicle')
-    //         .leftJoinAndSelect('parkingRecord.parking', 'parking')
-    //         .where('parking.id = :parkingId', { parkingId })
-    //         .andWhere('parkingRecord.exitDate IS NULL')
-    //         .andWhere('vehicle.id NOT IN (SELECT vehicle.id FROM parkingRecord WHERE parking.id = :parkingId AND pr.exitdate IS NOT NULL)')
-    //         .getMany();
-    // }
-
-    // async getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId: number, userId: number) : Promise<ParkingRecordEntity[]> {
-    //     return await this.repository.createQueryBuilder('parkingRecord')
-    //         .leftJoinAndSelect('parkingRecord.vehicle', 'vehicle')
-    //         .leftJoinAndSelect('parkingRecord.parking', 'parking')
-    //         .leftJoinAndSelect('parking.user', 'user')
-    //         .where('parking.id = :parkingId', { parkingId })
-    //         .andWhere('user.id = :userId', { userId })
-    //         .andWhere('parkingRecord.exitDate IS NULL')
-    //         .andWhere('vehicle.id NOT IN (SELECT vehicle.id FROM parkingRecord WHERE parking.id = :parkingId AND exitdate IS NOT NULL)')
-    //         .getMany();
-    // }
-
     async getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId: number): Promise<ParkingRecordEntity[]> {
         const subQuery = this.createQueryBuilder('r')
-            .select('COUNT(r.id)')
-            .where('r.vehicle_id = pr.vehicle_id')
-            .andWhere('r.parking_id = :parkingId', { parkingId });
+            .select('COUNT(r)')
+            .where('r.vehicle.id = pr.vehicle.id')
+            .andWhere('r.parking.id = :parkingId', { parkingId });
 
         const qb = this.createQueryBuilder('pr')
-            .leftJoin('pr.vehicle', 'v')
-            .where('pr.parking_id = :parkingId', { parkingId })
-            .andWhere('pr.exit_date IS NULL')
+            .leftJoinAndSelect('pr.vehicle', 'v')
+            .where('pr.parking.id = :parkingId', { parkingId })
+            .andWhere('pr.exitDate IS NULL')
+            .andWhere(`(${subQuery.getQuery()}) = 1`);
+
+        const results = await qb.getMany();
+        return results;
+    }
+    
+    async getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId: number, userId: number): Promise<ParkingRecordEntity[]> {
+        const subQuery = this.createQueryBuilder('r')
+            .select('COUNT(r)')
+            .where('r.vehicle.id = pr.vehicle.id')
+            .andWhere('r.parking.id = :parkingId', { parkingId });
+
+        const qb = this.createQueryBuilder('pr')
+            .leftJoinAndSelect('pr.vehicle', 'v')
+            .leftJoinAndSelect('pr.parking', 'park')
+            .leftJoinAndSelect('park.user', 'user')
+            .where('park.id = :parkingId', { parkingId })
+            .andWhere('user.id = :userId', { userId })
+            .andWhere('pr.exitDate IS NULL')
             .andWhere(`(${subQuery.getQuery()}) = 1`);
 
         const results = await qb.getMany();
         return results;
     }
 
-    async getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId: number, userId: number): Promise<ParkingRecordEntity[]> {
-        const qb = this.createQueryBuilder('pr')
-            .leftJoin('pr.vehicle', 'v')
-            .leftJoin('pr.parking', 'park')
-            .leftJoin('park.user', 'u')
-            .where('pr.parking_id = :parkingId', { parkingId })
-            .andWhere('pr.exit_date IS NULL')
-            .andWhere('u.id = :userId', { userId })
-            .andWhere(subQuery => {
-                subQuery.select('COUNT(r.id)')
-                    .from(ParkingRecordEntity, 'r')
-                    .where('r.vehicle_id = pr.vehicle_id')
-                    .andWhere('r.parking_id = :parkingId', { parkingId });
-                return `(${subQuery.getQuery()}) = 1`;
-            });
+    /**
+     * (ADMIN and PARTNER) Search for parked vehicles by matching license plate, e.g. entry "HT", 
+     * you can return vehicles with license plate "123HT4" | "HT231E".
+     */
 
-        const results = await qb.getMany();
-        return results;
+    async getParkingRecordsByVehiclePlateMatches(plate: string): Promise<ParkingRecordEntity[]> {
+        return await this.repository.createQueryBuilder('parkingRecord')
+            .leftJoinAndSelect('parkingRecord.vehicle', 'vehicle')
+            .where('UPPER(vehicle.plate) LIKE UPPER(:plate)', { plate: `%${plate}%` })
+            .andWhere('parkingRecord.exitDate IS NULL')
+            .getMany();
+    }    
+
+    async getParkingRecordsByUserIdAndVehiclePlateMatches(userId: number, plate: string): Promise<ParkingRecordEntity[]> {
+        return await this.repository.createQueryBuilder('parkingRecord')
+            .leftJoinAndSelect('parkingRecord.vehicle', 'vehicle')
+            .leftJoinAndSelect('parkingRecord.parking', 'parking')
+            .leftJoinAndSelect('parking.user', 'user')
+            .where('user.id = :userId', { userId })
+            .andWhere('UPPER(vehicle.plate) LIKE UPPER(:plate)', { plate: `%${plate}%` })
+            .andWhere('parkingRecord.exitDate IS NULL')
+            .getMany();
     }
-
-    // @Query("SELECT pr FROM ParkingRecord pr " +
-    //     "WHERE pr.parking.id = :parkingId " +
-    //     "AND pr.exitDate IS NULL " +
-    //     "AND (SELECT COUNT(r) FROM ParkingRecord r WHERE r.vehicle.id = pr.vehicle.id AND r.parking.id = :parkingId) = 1")
-    // List<ParkingRecord> getParkingRecordsFirstTimeWithExitDateNullByParkingId(@Param("parkingId") Long parkingId);
-
-    // @Query("SELECT pr FROM ParkingRecord pr " +
-    //     "WHERE pr.parking.id = :parkingId " +
-    //     "ANd pr.exitDate IS NULL " +
-    //     "AND pr.parking.user.id = :userId " +
-    //     "AND (SELECT COUNT(r) FROM ParkingRecord r WHERE r.vehicle.id = pr.vehicle.id AND r.parking.id = :parkingId) = 1")
-    // List<ParkingRecord> getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(@Param("parkingId") Long parkingId, @Param("userId") Long userId);
 
 }

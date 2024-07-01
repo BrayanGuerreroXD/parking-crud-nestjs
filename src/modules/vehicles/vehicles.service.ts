@@ -17,7 +17,7 @@ export class VehiclesService {
     await queryRunner.startTransaction();
     try {
       const vehicleEntity: VehicleEntity = new VehicleEntity();
-      vehicleEntity.plate = plate;
+      vehicleEntity.plate = plate.toUpperCase();
       const savedVehicle = await queryRunner.manager.save(vehicleEntity);
       await queryRunner.commitTransaction();
       return savedVehicle;

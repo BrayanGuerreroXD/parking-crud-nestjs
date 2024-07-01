@@ -153,7 +153,7 @@ export class ParkingRecordsService {
   /**
    * (ADMIN and SOCIO) return the 10 vehicles that have been registered the most times in the different parking lots and how many
    * times they have been registered different parking lots and how many times they have been
-   */
+  */
 
   public async getMostRegisteredVehiclesAtAllParking() : Promise<VehicleResponseDto[]> {
     const userId: number = await this.tokensService.getUserIdByRequestToken();
@@ -169,7 +169,7 @@ export class ParkingRecordsService {
   /**
    * (ADMIN and SOCIO) return the 10 vehicles that have been registered the most times in a parking 
    * lot and how many times they have been registered.
-   */
+  */
 
   public async getMostRegisteredVehiclesAtAllParkingByParkingId(parkingId : number) : Promise<VehicleResponseDto[]> {
     const userId: number = await this.tokensService.getUserIdByRequestToken();
@@ -191,7 +191,7 @@ export class ParkingRecordsService {
 
   /**
    * (ADMIN and SOCIO) verify which vehicles are parked for the first time in that parking lot.
-   */
+  */
 
   public async getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId : number) : Promise<ParkingRecordEntryResponseDto[]> {
     const userId: number = await this.tokensService.getUserIdByRequestToken();
@@ -210,23 +210,21 @@ export class ParkingRecordsService {
     return parkingRecords.map(this.toParkingRecordEntryResponseDto);
   }
 
+  /**
+   * (ADMIN and PARTNER) Search for parked vehicles by matching license plate, e.g. entry "HT", 
+   * you can return vehicles with license plate "123HT4" | "HT231E".
+  */
 
+  async getParkingRecordsByVehiclePlateMatches(plate : string) : Promise<ParkingRecordEntryResponseDto[]> {
+    const userId: number = await this.tokensService.getUserIdByRequestToken();
+    const userRole: string = await this.tokensService.getRoleByRequestToken();
 
-  // public List<ParkingRecordResponseDto> getParkingRecordsFirstTimeWithExitDateNullByParkingId(Long parkingId) {
-    //         String token = tokenService.getToken();
-    //         Long userId = tokenService.getUserIdByToken(token);
-    //         String userRole = tokenService.getUserRoleByToken(token);
-    
-    //         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, parkingId);
-    
-    //         List<ParkingRecord> parkingRecords = userRole.equals(RoleEnum.ADMIN.getRole()) ?
-    //             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId) :
-    //             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId, userId);
-    
-    //         return parkingRecords.stream()
-    //             .map(this::toParkingRecordResponseDto)
-    //             .toList();
-    //     }
+    const parkingRecords : ParkingRecordEntity[] = userRole === ROLES.ADMIN ?
+      await this.parkingRecordRepository.getParkingRecordsByVehiclePlateMatches(plate) :
+      await this.parkingRecordRepository.getParkingRecordsByUserIdAndVehiclePlateMatches(userId, plate);
+
+    return parkingRecords.map(this.toParkingRecordEntryResponseDto);
+  }
 
   // ================================= AUXILIARY METHODS =================================
 
@@ -270,78 +268,3 @@ export class ParkingRecordsService {
   }
 
 }
-
-//     // ================================= INDICATORS =================================
-
-
-
-    
-//     /**
-//      * (ADMIN and SOCIO) verify which vehicles are parked for the first time in that parking lot.
-//      */
-    
-//     @Override
-//     public List<ParkingRecordResponseDto> getParkingRecordsFirstTimeWithExitDateNullByParkingId(Long parkingId) {
-//         String token = tokenService.getToken();
-//         Long userId = tokenService.getUserIdByToken(token);
-//         String userRole = tokenService.getUserRoleByToken(token);
-
-//         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, parkingId);
-
-//         List<ParkingRecord> parkingRecords = userRole.equals(RoleEnum.ADMIN.getRole()) ?
-//             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingId(parkingId) :
-//             parkingRecordRepository.getParkingRecordsFirstTimeWithExitDateNullByParkingIdAndUserId(parkingId, userId);
-
-//         return parkingRecords.stream()
-//             .map(this::toParkingRecordResponseDto)
-//             .toList();
-//     }
-
-//     /**
-//      * (ADMIN and PARTNER) Search for parked vehicles by matching license plate, e.g. entry "HT", 
-//      * you can return vehicles with license plate "123HT4" | "HT231E".
-//      */
-
-//     @Override
-//     public List<ParkingRecordResponseDto> getParkingRecordsByVehiclePlateMatches(String plate) {
-//         String token = tokenService.getToken();
-//         Long userId = tokenService.getUserIdByToken(token);
-//         String userRole = tokenService.getUserRoleByToken(token);
-
-//         this.validateTokenAndParkingAssignedToUser(token, userId, userRole, null);
-
-//         List<ParkingRecord> parkingRecords = userRole.equals(RoleEnum.ADMIN.getRole()) ?
-//             parkingRecordRepository.getParkingRecordsByVehiclePlateMatches(plate) :
-//             parkingRecordRepository.getParkingRecordsByUserIdAndVehiclePlateMatches(userId, plate);
-
-//         return parkingRecords.stream()
-//             .map(this::toParkingRecordResponseDto)
-//             .toList();
-//     }
-
-//     // ================================= AUXILIARY METHODS =================================
-
-//     /**
-//      * Validate token, userId, userRole and parkingId (this last one can be null when it is not necessary to validate it).
-//      * @param token String
-//      * @param userId Long
-//      * @param userRole String
-//      * @param parkingId Long
-//      */
-//     private void validateTokenAndParkingAssignedToUser(String token, Long userId, String userRole, Long parkingId) {
-//         if (Objects.isNull(token))
-//             throw new TokenNullException();
-
-//         if (Objects.isNull(userId) || userId <= 0)
-//             throw new UserIdNullOrNotPositiveException();
-
-//         if (Objects.isNull(userRole) || userRole.isBlank())
-//             throw new UserRoleNullOrBlankException();
-        
-//         if (Objects.nonNull(parkingId) && Boolean.FALSE.equals(parkingService.isParkingAlreadyExists(parkingId)))
-//             throw new ParkingNotExistsException();
-
-//         if (Objects.nonNull(parkingId) && userRole.equals(RoleEnum.SOCIO.getRole())
-//                 && Boolean.FALSE.equals(parkingService.isParkingAssignedToUser(parkingId, userId)))
-//             throw new ParkingNotAssignedException();
-//     }
