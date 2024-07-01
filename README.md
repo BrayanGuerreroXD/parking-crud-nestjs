@@ -63,17 +63,17 @@ ___
    Create a .env file in the root directory of the project with the following content. Replace the placeholder values with actual secrets:
 
    ```dotenv
-     PORT:${APP_PORT}
-     DB_HOST: ${DB_HOST}
-     DB_PORT: ${DB_PORT}
-     DB_USER: ${DB_USER}
-     DB_PASSWORD: ${DB_PASSWORD}
-     DB_NAME: ${DB_NAME}
-     HASH_SALT: ${HASH_SALT}
-     JWT_SECRET: ${JWT_SECRET_KEY}
-     NUMBER_SESSIONS: ${NUMBER_OF_SESSIONS}
-     EXPIRATION_TIME: ${EXPIRATION_TIME}
-     URL_API_MAIL: http://localhost:3000/mail-record/send
+     PORT=${APP_PORT}
+     DB_HOST=${DB_HOST}
+     DB_PORT=${DB_PORT}
+     DB_USER=${DB_USER}
+     DB_PASSWORD=${DB_PASSWORD}
+     DB_NAME=${DB_NAME}
+     HASH_SALT=${HASH_SALT}
+     JWT_SECRET=${JWT_SECRET_KEY}
+     NUMBER_SESSIONS=${NUMBER_OF_SESSIONS}
+     EXPIRATION_TIME=${EXPIRATION_TIME}
+     URL_API_MAIL=http://localhost:3000/mail-record/send
    ```
 
    - **PORT**: Specifies the port number on which the server will listen for incoming requests.
