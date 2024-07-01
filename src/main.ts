@@ -27,7 +27,7 @@ async function bootstrap() {
   
   const app = await NestFactory.create(AppModule);
 
-  app.use(morgan('dev'));
+  app.use(morgan(process.env.MORGAN_FORMAT || 'dev'));
 
   app.useGlobalPipes(new ValidationPipe({
     transformOptions: {

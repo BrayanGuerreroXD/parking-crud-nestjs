@@ -5,10 +5,17 @@ import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 
 @Entity("parkingrecord")
 export class ParkingRecordEntity extends BaseEntity {
-    @Column()
+    @Column({
+        nullable: false,
+        default: () => "CURRENT_TIMESTAMP",
+        readonly: true
+    })
     entryDate!: Date;
 
-    @Column({nullable: true})
+    @Column({
+        nullable: true,
+        default: () => "CURRENT_TIMESTAMP",
+    })
     exitDate!: Date;
 
     @ManyToOne(() => VehicleEntity, {nullable: false})

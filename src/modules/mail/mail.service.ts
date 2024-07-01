@@ -32,9 +32,14 @@ export class MailService {
     });
 
     const headers = { 'Content-Type': 'application/json' };
-  
-    const response = await fetch(uri, { method: 'post', body, headers });
-  
+
+    let response;
+    try {
+      response = await fetch(uri, { method: 'post', body, headers });
+    } catch (e) {
+     throw e; 
+    }
+    
     if (!response.ok) 
       throw new NotSendMailException();
   

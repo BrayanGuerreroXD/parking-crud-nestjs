@@ -13,5 +13,6 @@ declare namespace NodeJS {
         NUMBER_SESSIONS: number;
         EXPIRATION_TIME: string;
         URL_API_MAIL: string;
+        MORGAN_FORMAT: string;
     }
 }

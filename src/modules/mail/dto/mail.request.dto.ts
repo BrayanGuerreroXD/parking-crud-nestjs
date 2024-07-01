@@ -1,8 +1,9 @@
-import { IsString, IsNotEmpty, Length, Matches, IsPositive } from "class-validator";
+import { IsString, IsNotEmpty, Length, Matches, IsPositive, MaxLength } from "class-validator";
 
 export class MailRequestDto {
-    @IsNotEmpty({message: 'Name is required'})
-    @IsString({message: 'Name must be a string'})
+    @IsNotEmpty({message: 'Email is required'})
+    @IsString({message: 'Email must be a string'})
+    @MaxLength(50, {message: 'Email must be a maximum of 50 characters'})
     email: string;
     
     @IsString({message: 'Plate must be a string'})

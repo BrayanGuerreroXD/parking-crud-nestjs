@@ -5,11 +5,15 @@ import { BaseEntity } from "../../../config/base.entity";
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
-    @Column({unique: true, nullable: false})
+    @Column({
+        unique: true, 
+        nullable: false,
+        length: 50
+    })
     email!: string;
 
     @Exclude()
-    @Column()
+    @Column({nullable: false})
     password!: string;
 
     @ManyToOne(() => RoleEntity, {nullable: false})

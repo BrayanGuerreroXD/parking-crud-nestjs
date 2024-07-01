@@ -3,6 +3,10 @@ import { Column, Entity } from "typeorm";
 
 @Entity('roles')
 export class RoleEntity extends BaseEntity {
-    @Column()
+    @Column({
+        unique: true, 
+        nullable: false, 
+        length: 10
+    })
     name!: string;
 }

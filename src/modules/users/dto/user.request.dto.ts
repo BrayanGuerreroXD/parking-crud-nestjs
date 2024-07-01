@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, MaxLength } from "class-validator";
 
 export class UserRequestDto {
-    @IsNotEmpty({message: 'Name is required'})
-    @IsString({message: 'Name must be a string'})
+    @IsNotEmpty({message: 'Email is required'})
+    @IsString({message: 'Email must be a string'})
+    @MaxLength(50, {message: 'Email must be a maximum of 50 characters'})
     email: string;
 
     @IsNotEmpty({message: 'Password is required'})

@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsPositive, IsString } from "class-validator";
+import { IsNotEmpty, IsPositive, IsString, MaxLength } from "class-validator";
 
 export class ParkingRequestDto {
     @IsNotEmpty({message: 'Name is required'})
     @IsString({message: 'Name must be a string'})
+    @MaxLength(50, {message: 'Name must be a maximum of 50 characters'})
     name!: string;
 
     @IsNotEmpty({message: 'Hourly cost is required'})

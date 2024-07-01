@@ -4,13 +4,13 @@ import { UserEntity } from "../../users/entities/user.entity";
 
 @Entity("parking")
 export class ParkingEntity extends BaseEntity {
-    @Column()
+    @Column({nullable: false, length: 50})
     name!: string;
 
-    @Column('double precision')
+    @Column('double precision', {nullable: false})
     hourlyCost!: number;
 
-    @Column()
+    @Column({nullable: false})
     maxParkingSpace!: number;
 
     @ManyToOne(() => UserEntity, {nullable: false})

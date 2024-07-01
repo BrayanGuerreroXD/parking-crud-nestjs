@@ -74,6 +74,7 @@ ___
      NUMBER_SESSIONS=${NUMBER_OF_SESSIONS}
      EXPIRATION_TIME=${EXPIRATION_TIME}
      URL_API_MAIL=http://localhost:3000/mail-record/send
+     MORGAN_FORMAT:${MORGAN_FORMAT}
    ```
 
    - **PORT**: Specifies the port number on which the server will listen for incoming requests.
@@ -87,6 +88,7 @@ ___
    - **NUMBER_SESSIONS**: Specifies the maximum number of concurrent sessions allowed per user.
    - **EXPIRATION_TIME**: Specifies the expiration time (in seconds) for JWTs after which they are no longer valid.
    - **URL_API_MAIL**: Specifies the URL endpoint for sending emails via an external API (http://localhost:3000/mail-record/send in this case).
+   - **MORGAN_FORMAT**: Specifies the morgan format for logging incoming HTTP requests in the server console. (e.g., dev)
 
      Ensure these values are kept secret and not shared publicly.
 
