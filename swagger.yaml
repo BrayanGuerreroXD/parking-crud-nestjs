@@ -1,0 +1,1402 @@
+openapi: 3.0.0
+paths:
+  /user/register:
+    post:
+      operationId: UsersController_createUser
+      summary: Create a new user
+      security:
+        - access-token: []
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDto'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponseDto'
+        '400':
+          description: Bad Request - Caused by an incorrect request object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Email must be a maximum of 50 characters
+                        - Email is not valid
+                        - Email cannot be empty
+                        - Email must be a string
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.364Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.364Z'
+                    description: Date of the error
+        '409':
+          description: Conflict - Caused by an email already registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Email already exists
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 409
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.364Z'
+                    description: Date of the error
+      tags:
+        - Users
+  /auth/login:
+    post:
+      operationId: AuthController_login
+      summary: Login user
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDto'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    example: >-
+                      eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiQURNSU4iLCJzdWIiOiIxIiwiaWF0IjoxNzE5ODYyNTQzLCJleHAiOjE3MTk4NjYxNDN9.qMOYT-hipMALLcK3kHIkMFaxcQQLH4bhbtkMl50-t-c
+                    description: JWT token
+        '400':
+          description: Bad Request - Caused by an incorrect request object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Email must be a maximum of 50 characters
+                        - Email is not valid
+                        - Email cannot be empty
+                        - Email must be a string
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.421Z'
+                    description: Date of the error
+        '401':
+          description: Unauthorized - Caused by an invalid user or password
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Data not valid
+                      description: List of errors
+                  error:
+                    type: string
+                    example: UnauthorizedException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.421Z'
+                    description: Date of the error
+      tags: &ref_0
+        - Auth
+  /auth/logout:
+    post:
+      operationId: AuthController_logout
+      summary: Logout user
+      parameters: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logout successful
+                    description: Logout message
+        '401':
+          description: Unauthorized - Caused by an invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Invalid token
+                      description: List of errors
+                  error:
+                    type: string
+                    example: InvalidTokenException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.421Z'
+                    description: Date of the error
+      tags: *ref_0
+      security:
+        - access-token: []
+  /histories/earnings/parkingId/{parkingId}:
+    get:
+      operationId: HistoriesController_getEarnings
+      summary: Get earnings from a specific parking lot
+      parameters:
+        - name: parkingId
+          required: true
+          in: path
+          description: Parking ID
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Earnings obtained successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EarningsResponseDto'
+        '401':
+          description: Unauthorized - Caused by Invalid token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Invalid token
+                      description: List of errors
+                  error:
+                    type: string
+                    example: InvalidTokenException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.386Z'
+                    description: Date of the error
+      tags:
+        - Histories
+      security:
+        - access-token: []
+  /parking:
+    post:
+      operationId: ParkingsController_createParking
+      summary: Save parking
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingResponseDto'
+        '400':
+          description: Bad Request - Caused by an invalid user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - >-
+                          User isn't a 'SOCIO', only users with role 'SOCIO' can
+                          be assigned to the parking
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.354Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.354Z'
+                    description: Date of the error
+        '404':
+          description: Not Found - Caused by user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User not found
+                      description: List of errors
+                  error:
+                    type: string
+                    example: EntityNotFoundException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 404
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.354Z'
+                    description: Date of the error
+      tags: &ref_1
+        - Parkings
+      security: &ref_2
+        - access-token: []
+  /parking/{id}:
+    put:
+      operationId: ParkingsController_updateParking
+      summary: Update parking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingResponseDto'
+        '400':
+          description: Bad Request - Caused by an invalid user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - >-
+                          User isn't a 'SOCIO', only users with role 'SOCIO' can
+                          be assigned to the parking
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.355Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.355Z'
+                    description: Date of the error
+        '404':
+          description: Not Found - Caused by user not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User not found
+                      description: List of errors
+                  error:
+                    type: string
+                    example: EntityNotFoundException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 404
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.355Z'
+                    description: Date of the error
+      tags: *ref_1
+      security: *ref_2
+    get:
+      operationId: ParkingsController_getParkingById
+      summary: Get parking by id
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingResponseDto'
+        '400':
+          description: Bad Request - Caused by parking not exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                      description: List of errors
+                  error:
+                    type: string
+                    example: ParkingNotExistsException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.356Z'
+                    description: Date of the error
+      tags: *ref_1
+      security: *ref_2
+    delete:
+      operationId: ParkingsController_deleteParking
+      summary: Delete parking
+      parameters:
+        - name: id
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Parking deleted
+        '400':
+          description: Bad Request - Caused by parking not exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                      description: List of errors
+                  error:
+                    type: string
+                    example: ParkingNotExistsException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.356Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.356Z'
+                    description: Date of the error
+      tags: *ref_1
+      security: *ref_2
+  /parkings:
+    get:
+      operationId: ParkingsController_getAllParkings
+      summary: Get all parking
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingResponseDto'
+        '404':
+          description: Not Found - Caused by not found any parking
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Not found any parking
+                      description: List of errors
+                  error:
+                    type: string
+                    example: NotFoundException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 404
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.356Z'
+                    description: Date of the error
+      tags: *ref_1
+      security: *ref_2
+  /parking-record/entry:
+    post:
+      operationId: ParkingRecordsController_createParkingEntryRecord
+      summary: Create parking entry record
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingRecordRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingRecordEntryResponseDto'
+        '400':
+          description: >-
+            Bad Request - This endpoint can return multiple responses based on
+            bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                        - The parking not assigned to the user
+                        - Parking is full
+                        - >-
+                          Unable to Register Entry, vehicle already in a parking
+                          lot
+                      description: List of errors
+                  error:
+                    type: string
+                    example: >-
+                      BadRequestException, ParkingNotAssignedException,
+                      ParkingIsFullException, ParkingNotExistsException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.410Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.410Z'
+                    description: Date of the error
+      tags: &ref_3
+        - Parking Records
+      security: &ref_4
+        - access-token: []
+  /parking-record/exit:
+    post:
+      operationId: ParkingRecordsController_createParkingExitRecord
+      summary: Create parking exit record
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ParkingRecordRequestDto'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParkingRecordExitResponseDto'
+        '400':
+          description: >-
+            Bad Request - This endpoint can return multiple responses based on
+            bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                        - The parking not assigned to the user
+                        - Vehicle not found
+                        - >-
+                          Unable to Register Exit, no license plate found in any
+                          parking lot.
+                        - >-
+                          Unable to Register Exit, vehicle license plate in
+                          another parking lot.
+                        - >-
+                          Unable to Register Exit, vehicle not found in a
+                          parking lot.
+                      description: List of errors
+                  error:
+                    type: string
+                    example: >-
+                      BadRequestException, ParkingNotAssignedException,
+                      VehicleNotFoundException, ParkingNotExistsException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.411Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.411Z'
+                    description: Date of the error
+      tags: *ref_3
+      security: *ref_4
+  /parking-record/parked-vehicles/parkingId/{parkingId}:
+    get:
+      operationId: ParkingRecordsController_getParkingRecordsWithExitDateNullByParkingId
+      summary: Get the vehicles currently parked in a specific parking lot
+      parameters:
+        - name: parkingId
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingRecordEntryResponseDto'
+        '400':
+          description: >-
+            Bad Request - This endpoint can return multiple responses based on
+            bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                        - The parking not assigned to the user
+                      description: List of errors
+                  error:
+                    type: string
+                    example: ParkingNotExistsException, ParkingNotAssignedException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.411Z'
+                    description: Date of the error
+      tags: *ref_3
+      security: *ref_4
+  /parking-record/parked-vehicles/most-registered:
+    get:
+      operationId: ParkingRecordsController_getMostRegisteredVehiclesAtAllParking
+      summary: >-
+        Find the top 10 vehicles that have been registered the most times in all
+        parking lots and how many times they have been registered
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleResponseDto'
+      tags: *ref_3
+      security: *ref_4
+  /parking-record/parked-vehicles/most-registered/parkingId/{parkingId}:
+    get:
+      operationId: >-
+        ParkingRecordsController_getMostRegisteredVehiclesAtAllParkingByParkingId
+      summary: >-
+        Find the 10 vehicles that have been registered the most times in a
+        specific parking lot and how many times they have been registered
+      parameters:
+        - name: parkingId
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/VehicleResponseDto'
+        '400':
+          description: >-
+            Bad Request - This endpoint can return multiple responses based on
+            bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                        - The parking not assigned to the user
+                      description: List of errors
+                  error:
+                    type: string
+                    example: ParkingNotExistsException, ParkingNotAssignedException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.411Z'
+                    description: Date of the error
+      tags: *ref_3
+      security: *ref_4
+  /parking-record/parked-vehicles/first-time/parkingId/{parkingId}:
+    get:
+      operationId: >-
+        ParkingRecordsController_getParkingRecordsFirstTimeWithExitDateNullByParkingId
+      summary: Obtain vehicles parked for the first time in that parking lot
+      parameters:
+        - name: parkingId
+          required: true
+          in: path
+          description: Parking id
+          schema:
+            type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingRecordEntryResponseDto'
+        '400':
+          description: >-
+            Bad Request - This endpoint can return multiple responses based on
+            bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Parking not exists
+                        - The parking not assigned to the user
+                      description: List of errors
+                  error:
+                    type: string
+                    example: ParkingNotExistsException, ParkingNotAssignedException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.412Z'
+                    description: Date of the error
+      tags: *ref_3
+      security: *ref_4
+  /parking-record/parked-vehicles/matches/plate/{plate}:
+    get:
+      operationId: ParkingRecordsController_getParkingRecordsByVehiclePlateMatches
+      summary: Obtain vehicles parked for the first time in all parking lots
+      parameters:
+        - name: plate
+          required: true
+          in: path
+          description: Vehicle plate number
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ParkingRecordEntryResponseDto'
+      tags: *ref_3
+      security: *ref_4
+  /sending-mail:
+    post:
+      operationId: MailController_sendMail
+      summary: Send mail
+      parameters: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MailRequestDto'
+      responses:
+        '200':
+          description: Mail sent successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MailResponseDto'
+        '400':
+          description: Bad Request - Caused by an incorrect request object
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Email must be a maximum of 50 characters
+                        - Email is not valid
+                        - Email cannot be empty
+                        - Email must be a string
+                      description: List of errors
+                  error:
+                    type: string
+                    example: BadRequestException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 400
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.452Z'
+                    description: Date of the error
+        '401':
+          description: >-
+            Unauthorized - Caused by user does not have permission to access
+            this route
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - User does not have permission to access this route
+                      description: List of errors
+                  error:
+                    type: string
+                    example: JwtAuthException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 401
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.452Z'
+                    description: Date of the error
+        '500':
+          description: Error - Internal server error occurred
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: array
+                    items:
+                      type: string
+                      example:
+                        - Error sending mail
+                      description: List of errors
+                  error:
+                    type: string
+                    example: InternalServerErrorException
+                    description: Error type
+                  status:
+                    type: number
+                    example: 500
+                    description: HTTP status code
+                  date:
+                    type: string
+                    example: '2024-07-09T22:07:00.452Z'
+                    description: Date of the error
+      tags:
+        - Mail
+      security:
+        - access-token: []
+info:
+  title: PARKING CRUD API
+  description: >-
+    The Rest API manages vehicle parking, allows partner creation for vehicle
+    entry and exit, and uses JWT tokens with role-based access control (ADMIN
+    and SOCIO) expiring every 6 hours, built with NestJS and PostgreSQL
+  version: '1.0'
+  contact: {}
+tags: []
+servers: []
+components:
+  securitySchemes:
+    access-token:
+      scheme: bearer
+      bearerFormat: JWT
+      type: http
+      in: header
+  schemas:
+    UserRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email
+          maxLength: 50
+          example: socio@mail.com
+        password:
+          type: string
+          description: User password
+          example: socio
+      required:
+        - email
+        - password
+    RoleDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Role id
+          example: 2
+        name:
+          type: string
+          description: Role name
+          example: SOCIO
+      required:
+        - id
+        - name
+    UserResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: User id
+          example: 2
+        email:
+          type: string
+          description: User email
+          example: socio@mail.com
+        role:
+          description: User role
+          allOf:
+            - $ref: '#/components/schemas/RoleDto'
+      required:
+        - id
+        - email
+        - role
+    AuthDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email
+          maxLength: 50
+          example: admin@mail.com
+        password:
+          type: string
+          description: User password
+          example: admin
+      required:
+        - email
+        - password
+    EarningsResponseDto:
+      type: object
+      properties:
+        today:
+          type: number
+          description: Today earnings
+          example: 0
+        week:
+          type: number
+          description: Week earnings
+          example: 0
+        month:
+          type: number
+          description: Month earnings
+          example: 0
+        year:
+          type: number
+          description: Year earnings
+          example: 0
+      required:
+        - today
+        - week
+        - month
+        - year
+    ParkingRequestDto:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Parking name
+          maxLength: 50
+          example: Parking One
+        hourlyCost:
+          type: number
+          description: Hourly cost
+          example: 10.5
+        maxParkingSpace:
+          type: number
+          description: Max parking space
+          example: 100
+        userId:
+          type: number
+          description: User id
+          example: 2
+      required:
+        - name
+        - hourlyCost
+        - maxParkingSpace
+        - userId
+    ParkingResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Parking id
+          example: 1
+        name:
+          type: string
+          description: Parking name
+          example: Parking One
+        hourlyCost:
+          type: number
+          description: Hourly cost
+          example: 10.5
+        maxParkingSpace:
+          type: number
+          description: Max parking space
+          example: 100
+        user:
+          description: User
+          allOf:
+            - $ref: '#/components/schemas/UserResponseDto'
+      required:
+        - id
+        - name
+        - hourlyCost
+        - maxParkingSpace
+        - user
+    ParkingRecordRequestDto:
+      type: object
+      properties:
+        plate:
+          type: string
+          description: Vehicle plate
+          example: ABC123
+          minLength: 6
+          maxLength: 6
+        parkingId:
+          type: number
+          description: Parking id
+          example: 1
+      required:
+        - plate
+        - parkingId
+    ParkingRecordEntryResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Record id
+          example: 1
+        plate:
+          type: string
+          description: Vehicle plate
+          example: ABC123
+        entryDate:
+          format: date-time
+          type: string
+          description: Entry date
+          example: '2021-10-15T00:00:00.000Z'
+      required:
+        - id
+        - plate
+        - entryDate
+    ParkingRecordExitResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Record id
+          example: 1
+        plate:
+          type: string
+          description: Vehicle plate
+          example: ABC123
+        entryDate:
+          format: date-time
+          type: string
+          description: Entry date
+          example: '2021-10-15T00:00:00.000Z'
+        exitDate:
+          format: date-time
+          type: string
+          description: Exit date
+          example: '2021-10-15T04:00:00.000Z'
+      required:
+        - id
+        - plate
+        - entryDate
+        - exitDate
+    VehicleResponseDto:
+      type: object
+      properties:
+        id:
+          type: number
+          description: Vehicle id
+          example: 1
+        plate:
+          type: string
+          description: Vehicle plate
+          example: ABC123
+        recordCount:
+          type: number
+          description: Record count
+          example: 2
+      required:
+        - id
+        - plate
+        - recordCount
+    MailRequestDto:
+      type: object
+      properties:
+        email:
+          type: string
+          description: User email
+          maxLength: 50
+          example: socio@mail.com
+        plate:
+          type: string
+          description: Vehicle plate
+          example: ABC123
+          minLength: 6
+          maxLength: 6
+        message:
+          type: string
+          description: Message to send
+          example: Your parking time is about to expire
+        parkingId:
+          type: number
+          description: Parking id
+          example: 1
+      required:
+        - email
+        - plate
+        - message
+        - parkingId
+    MailResponseDto:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message sent by the server
+          example: Mail sent successfully
+      required:
+        - message

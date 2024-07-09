@@ -9,7 +9,7 @@ ___
 
 Rest API for the management and control of vehicle parking, the API allows the creation of partners who will manage the entry and exit of vehicles in the parking lots in which they are related. 
 
-The API uses Spring Security and JWT Token to manage an access control system by role (ADMIN and PARTNER) through a token that expires every 6 hours.
+The API uses JWT Token to manage an access control system by role (ADMIN and SOCIO) through a token that expires every 6 hours.
 
 #### Roles
 
@@ -34,10 +34,11 @@ ___
 - [Node.js v20.15.0](https://nodejs.org/ "Node.js"): Node.js version 20.15.0 or higher runtime is required to use the API.
 - [NestJS v10.0.0](https://nestjs.com/ "NestJS"): NestJS version 10.0.0 or higher framework is used to build the API.
 - [PostgreSQL v16.3](https://www.postgresql.org/ "PostgreSQL"): PostgreSQL version 16.3 or higher is used as the relational database management system for storing data related to parking operations.
+- [Swagger v7.4.0](https://swagger.io/ "Swagger"): Swagger version 7.4.0 or higher is required to use the API.
 
 |Backend|
 |---|
-|![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Git](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white)|
+|![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white) ![NestJS](https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white) ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white) ![JWT](https://img.shields.io/badge/JWT-black?style=for-the-badge&logo=JSON%20web%20tokens) ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=white) ![Git](https://img.shields.io/badge/GIT-E44C30?style=for-the-badge&logo=git&logoColor=white)|
 
 ___
 ### Installation and Usage:
@@ -92,13 +93,13 @@ ___
 
      Ensure these values are kept secret and not shared publicly.
 
-5. **Install all dependencies**
+4. **Install all dependencies**
    
     ```bash
     $ npm install
     ```
 
-6. **Generate and execute the migrations to create the tables in the database**.
+5. **Generate and execute the migrations to create the tables in the database**.
 
    To generate the migrations of the entities, you must create a folder in src called migrations: `src/migrations` and place the following command:
 
@@ -118,7 +119,7 @@ ___
    $ npm run m:seed
    ```
 
-7. **Running de app**
+6. **Running de app**
 
     ```bash
     # development
@@ -131,7 +132,7 @@ ___
     $ npm run start:prod
     ```
 
-8. **Clone the Mail Simulation project repository**
+7. **Clone the Mail Simulation project repository**
 
    Open the terminal and type the following command to download the Mail Simulation project
 
@@ -139,7 +140,7 @@ ___
     $ git clone https://github.com/BrayanGuerreroXD/mail-simulator-nestjs.git
    ```
 
-9. **Test postman http request collection**
+8. **Test postman http request collection**
 
    After both projects are running, it is time to test the http requests to determine the correct functioning of the API. The order of the Postman collection looks as follows:
 
@@ -148,3 +149,11 @@ ___
    To obtain the authorization token for the ADMIN user is with the Login request, this token is obtained and can be added to each of the other requests in the ADMIN directory in the Bearer Token of type Authorization.
 
    Likewise with the SOCIO user, in his directory there is the request to obtain his authorization token so that he can use all the collection of requests of the SOCIO user.
+
+9. **Swagger Documentation**
+
+   To test HTTP requests and verify the correct functioning of the API, you can use the interactive documentation provided by Swagger. Access the Swagger documentation at the following URL:
+
+   http://localhost:8081/docs
+
+   This interface will allow you to explore, test and validate the different API endpoints in a simple and efficient way.
